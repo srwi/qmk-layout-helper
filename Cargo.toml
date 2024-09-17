@@ -11,3 +11,4 @@ edition = "2021"
 [dependencies]
 qmk-via-api = "0.0.1"
 eframe = "0.28.1"
+serde_json = "1.0.128"
