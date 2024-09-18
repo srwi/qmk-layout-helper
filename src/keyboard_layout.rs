@@ -4,6 +4,7 @@ use std::io::BufReader;
 
 #[derive(Debug, Clone)]
 pub struct Key {
+    pub label: String,
     pub matrix: (usize, usize),
     pub x: f32,
     pub y: f32,
@@ -32,12 +33,14 @@ impl KeyboardLayout {
                 .map(|v| v.as_u64().unwrap() as usize)
                 .collect();
 
+            let label = key["label"].as_str().unwrap_or("").to_string();
             let x = key["x"].as_f64().unwrap_or(0.0) as f32;
             let y = key["y"].as_f64().unwrap_or(0.0) as f32;
             let w = key["w"].as_f64().unwrap_or(1.0) as f32;
             let h = key["h"].as_f64().unwrap_or(1.0) as f32;
 
             keys.push(Key {
+                label,
                 matrix: (matrix[0], matrix[1]),
                 x,
                 y,

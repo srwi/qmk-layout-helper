@@ -42,19 +42,54 @@ impl eframe::App for Overlay {
                 let rect = egui::Rect::from_min_size(
                     egui::pos2(key.x * unit_size, key.y * unit_size),
                     egui::vec2(key.w * unit_size, key.h * unit_size),
-                );
+                ).shrink(0.05 * unit_size);
                 ui.painter().rect(
                     rect,
-                    0.0,
-                    egui::Color32::from_rgba_unmultiplied(200, 200, 200, 100),
+                    0.12 * unit_size,
+                    egui::Color32::from_rgba_unmultiplied(150, 150, 150, 170),
                     egui::Stroke::NONE,
                 );
-                ui.painter().text(
-                    rect.center(),
-                    egui::Align2::CENTER_CENTER,
-                    "x",
-                    egui::FontId::default(),
+
+                let font = egui::FontId::proportional(0.5 * unit_size);
+                let text = key.label.as_str();
+                
+                let galley = ui.painter().layout_no_wrap(
+                    text.to_string(),
+                    font.clone(),
                     egui::Color32::WHITE,
+                );
+
+                let truncated_text = if galley.rect.width() > rect.width() {
+                    // TODO: Later this should be replaced with the short key code display name
+                    let mut truncated = text.to_string();
+                    while truncated.len() > 1 {
+                        truncated.pop();
+                        let temp_galley = ui.painter().layout_no_wrap(
+                            format!("{}...", truncated),
+                            font.clone(),
+                            egui::Color32::WHITE,
+                        );
+                        if temp_galley.rect.width() <= rect.width() {
+                            break;
+                        }
+                    }
+                    format!("{}...", truncated)
+                } else {
+                    text.to_string()
+                };
+
+                let final_galley = ui.painter().layout_no_wrap(
+                    truncated_text,
+                    font,
+                    egui::Color32::WHITE,
+                );
+
+                let text_pos = rect.center() - final_galley.rect.center().to_vec2();
+
+                ui.painter().galley(
+                    text_pos,
+                    final_galley,
+                    egui::Color32::WHITE
                 );
             }
         });
@@ -62,12 +97,11 @@ impl eframe::App for Overlay {
 }
 
 fn main() -> Result<(), eframe::Error> {
-    let keyboard_layout = KeyboardLayout::new("C:/Users/Stephan/Downloads/keyboard.json")
+    let keyboard_layout = KeyboardLayout::new("C:/Users/Stephan/Downloads/keyboard2.json")
         .expect("Failed to read keyboard layout.");
-
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
-            .with_inner_size([320.0, 240.0])
+            .with_inner_size([700.0, 240.0])
             // .with_decorations(false)
             // .with_taskbar(false)
             // .with_mouse_passthrough(true)
@@ -75,9 +109,8 @@ fn main() -> Result<(), eframe::Error> {
             .with_always_on_top(),
         ..Default::default()
     };
-
     eframe::run_native(
-        "Transparent Window",
+        "QMK Layout Helper",
         options,
         Box::new(|_cc| {
             Ok(Box::<Overlay>::new(Overlay::new(keyboard_layout)))
