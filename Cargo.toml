@@ -9,6 +9,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-qmk-via-api = "0.0.1"
+clap = { version = "4.5.18", features = ["derive"] }
 eframe = "0.28.1"
+qmk-via-api = "0.0.1"
 serde_json = "1.0.128"

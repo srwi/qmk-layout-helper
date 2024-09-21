@@ -1,9 +1,11 @@
 use std::{cmp::min, ffi::c_double};
 
+use crate::egui::ViewportCommand;
 use eframe::egui;
 use keyboard_layout::KeyboardLayout;
-use crate::egui::ViewportCommand;
 mod keyboard_layout;
+use clap::Parser;
+use std::path::PathBuf;
 
 struct Overlay {
     keyboard_layout: KeyboardLayout,
@@ -42,7 +44,8 @@ impl eframe::App for Overlay {
                 let rect = egui::Rect::from_min_size(
                     egui::pos2(key.x * unit_size, key.y * unit_size),
                     egui::vec2(key.w * unit_size, key.h * unit_size),
-                ).shrink(0.05 * unit_size);
+                )
+                .shrink(0.05 * unit_size);
                 ui.painter().rect(
                     rect,
                     0.12 * unit_size,
@@ -52,7 +55,7 @@ impl eframe::App for Overlay {
 
                 let font = egui::FontId::proportional(0.5 * unit_size);
                 let text = key.label.as_str();
-                
+
                 let galley = ui.painter().layout_no_wrap(
                     text.to_string(),
                     font.clone(),
@@ -78,27 +81,36 @@ impl eframe::App for Overlay {
                     text.to_string()
                 };
 
-                let final_galley = ui.painter().layout_no_wrap(
-                    truncated_text,
-                    font,
-                    egui::Color32::WHITE,
-                );
+                let final_galley =
+                    ui.painter()
+                        .layout_no_wrap(truncated_text, font, egui::Color32::WHITE);
 
                 let text_pos = rect.center() - final_galley.rect.center().to_vec2();
 
-                ui.painter().galley(
-                    text_pos,
-                    final_galley,
-                    egui::Color32::WHITE
-                );
+                ui.painter()
+                    .galley(text_pos, final_galley, egui::Color32::WHITE);
             }
         });
     }
 }
 
+#[derive(Parser)]
+struct Cli {
+    keyboard_config: PathBuf,
+
+    #[arg(short = 'l', long = "layout", default_value = "LAYOUT")]
+    layout_name: String,
+}
+
 fn main() -> Result<(), eframe::Error> {
-    let keyboard_layout = KeyboardLayout::new("C:/Users/Stephan/Downloads/keyboard2.json")
+    let cli = Cli::parse();
+
+    let keyboard_config = cli.keyboard_config.to_str().expect("Invalid path");
+    let layout_name = &cli.layout_name;
+
+    let keyboard_layout = KeyboardLayout::new(&keyboard_config, &layout_name)
         .expect("Failed to read keyboard layout.");
+
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
             .with_inner_size([700.0, 240.0])
@@ -112,8 +124,6 @@ fn main() -> Result<(), eframe::Error> {
     eframe::run_native(
         "QMK Layout Helper",
         options,
-        Box::new(|_cc| {
-            Ok(Box::<Overlay>::new(Overlay::new(keyboard_layout)))
-        }),
+        Box::new(|_cc| Ok(Box::<Overlay>::new(Overlay::new(keyboard_layout)))),
     )
 }

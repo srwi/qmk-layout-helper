@@ -1,0 +1,865 @@
+{
+    "KC_NO": {
+        "name": ""
+    },
+    "KC_TRNS": {
+        "name": "▽"
+    },
+    "KC_ESC": {
+        "name": "Esc"
+    },
+    "KC_A": {
+        "name": "A"
+    },
+    "KC_B": {
+        "name": "B"
+    },
+    "KC_C": {
+        "name": "C"
+    },
+    "KC_D": {
+        "name": "D"
+    },
+    "KC_E": {
+        "name": "E"
+    },
+    "KC_F": {
+        "name": "F"
+    },
+    "KC_G": {
+        "name": "G"
+    },
+    "KC_H": {
+        "name": "H"
+    },
+    "KC_I": {
+        "name": "I"
+    },
+    "KC_J": {
+        "name": "J"
+    },
+    "KC_K": {
+        "name": "K"
+    },
+    "KC_L": {
+        "name": "L"
+    },
+    "KC_M": {
+        "name": "M"
+    },
+    "KC_N": {
+        "name": "N"
+    },
+    "KC_O": {
+        "name": "O"
+    },
+    "KC_P": {
+        "name": "P"
+    },
+    "KC_Q": {
+        "name": "Q"
+    },
+    "KC_R": {
+        "name": "R"
+    },
+    "KC_S": {
+        "name": "S"
+    },
+    "KC_T": {
+        "name": "T"
+    },
+    "KC_U": {
+        "name": "U"
+    },
+    "KC_V": {
+        "name": "V"
+    },
+    "KC_W": {
+        "name": "W"
+    },
+    "KC_X": {
+        "name": "X"
+    },
+    "KC_Y": {
+        "name": "Y"
+    },
+    "KC_Z": {
+        "name": "Z"
+    },
+    "KC_1": {
+        "name": "!\n1"
+    },
+    "KC_2": {
+        "name": "@\n2"
+    },
+    "KC_3": {
+        "name": "#\n3"
+    },
+    "KC_4": {
+        "name": "$\n4"
+    },
+    "KC_5": {
+        "name": "%\n5"
+    },
+    "KC_6": {
+        "name": "^\n6"
+    },
+    "KC_7": {
+        "name": "&\n7"
+    },
+    "KC_8": {
+        "name": "*\n8"
+    },
+    "KC_9": {
+        "name": "(\n9"
+    },
+    "KC_0": {
+        "name": ")\n0"
+    },
+    "KC_MINS": {
+        "name": "_\n-"
+    },
+    "KC_EQL": {
+        "name": "+\n="
+    },
+    "KC_GRV": {
+        "name": "~\n`"
+    },
+    "KC_LBRC": {
+        "name": "{\n["
+    },
+    "KC_RBRC": {
+        "name": "}\n]"
+    },
+    "KC_BSLS": {
+        "name": "|\n\\"
+    },
+    "KC_SCLN": {
+        "name": ":\n;"
+    },
+    "KC_QUOT": {
+        "name": "\"\n\""
+    },
+    "KC_COMM": {
+        "name": "<\n,"
+    },
+    "KC_DOT": {
+        "name": ">\n."
+    },
+    "KC_SLSH": {
+        "name": "?\n/"
+    },
+    "KC_PEQL": {
+        "name": "="
+    },
+    "KC_PCMM": {
+        "name": ","
+    },
+    "KC_F1": {
+        "name": "F1"
+    },
+    "KC_F2": {
+        "name": "F2"
+    },
+    "KC_F3": {
+        "name": "F3"
+    },
+    "KC_F4": {
+        "name": "F4"
+    },
+    "KC_F5": {
+        "name": "F5"
+    },
+    "KC_F6": {
+        "name": "F6"
+    },
+    "KC_F7": {
+        "name": "F7"
+    },
+    "KC_F8": {
+        "name": "F8"
+    },
+    "KC_F9": {
+        "name": "F9"
+    },
+    "KC_F10": {
+        "name": "F10"
+    },
+    "KC_F11": {
+        "name": "F11"
+    },
+    "KC_F12": {
+        "name": "F12"
+    },
+    "KC_PSCR": {
+        "name": "Print Screen",
+        "shortName": "Print"
+    },
+    "KC_SLCK": {
+        "name": "Scroll Lock",
+        "shortName": "Scroll"
+    },
+    "KC_PAUS": {
+        "name": "Pause"
+    },
+    "KC_TAB": {
+        "name": "Tab"
+    },
+    "KC_BSPC": {
+        "name": "Backspace",
+        "shortName": "Bksp"
+    },
+    "KC_INS": {
+        "name": "Insert",
+        "shortName": "Ins"
+    },
+    "KC_DEL": {
+        "name": "Del"
+    },
+    "KC_HOME": {
+        "name": "Home"
+    },
+    "KC_END": {
+        "name": "End"
+    },
+    "KC_PGUP": {
+        "name": "Page Up",
+        "shortName": "PgUp"
+    },
+    "KC_PGDN": {
+        "name": "Page Down",
+        "shortName": "PgDn"
+    },
+    "KC_NLCK": {
+        "name": "Num\nLock",
+        "shortName": "N.Lck"
+    },
+    "KC_CAPS": {
+        "name": "Caps Lock"
+    },
+    "KC_ENT": {
+        "name": "Enter"
+    },
+    "KC_P1": {
+        "name": "1"
+    },
+    "KC_P2": {
+        "name": "2"
+    },
+    "KC_P3": {
+        "name": "3"
+    },
+    "KC_P4": {
+        "name": "4"
+    },
+    "KC_P5": {
+        "name": "5"
+    },
+    "KC_P6": {
+        "name": "6"
+    },
+    "KC_P7": {
+        "name": "7"
+    },
+    "KC_P8": {
+        "name": "8"
+    },
+    "KC_P9": {
+        "name": "9"
+    },
+    "KC_P0": {
+        "name": "0"
+    },
+    "KC_PSLS": {
+        "name": "÷"
+    },
+    "KC_PAST": {
+        "name": "×"
+    },
+    "KC_PMNS": {
+        "name": "-"
+    },
+    "KC_PPLS": {
+        "name": "+"
+    },
+    "KC_PDOT": {
+        "name": "."
+    },
+    "KC_PENT": {
+        "name": "Num\nEnter",
+        "shortName": "N.Ent"
+    },
+    "KC_LSFT": {
+        "name": "Left Shift",
+        "shortName": "LShft"
+    },
+    "KC_RSFT": {
+        "name": "Right Shift",
+        "shortName": "RShft"
+    },
+    "KC_LCTL": {
+        "name": "Left Ctrl"
+    },
+    "KC_RCTL": {
+        "name": "Right Ctrl",
+        "shortName": "RCtl"
+    },
+    "KC_LGUI": {
+        "name": "Left Win",
+        "shortName": "LWin"
+    },
+    "KC_RGUI": {
+        "name": "Right Win",
+        "shortName": "RWin"
+    },
+    "KC_LALT": {
+        "name": "Left Alt",
+        "shortName": "LAlt"
+    },
+    "KC_RALT": {
+        "name": "Right Alt",
+        "shortName": "RAlt"
+    },
+    "KC_SPC": {
+        "name": "Space"
+    },
+    "KC_APP": {
+        "name": "Menu",
+        "shortName": "RApp"
+    },
+    "KC_LEFT": {
+        "name": "Left",
+        "shortName": "←"
+    },
+    "KC_DOWN": {
+        "name": "Down",
+        "shortName": "↓"
+    },
+    "KC_UP": {
+        "name": "Up",
+        "shortName": "↑"
+    },
+    "KC_RGHT": {
+        "name": "Right",
+        "shortName": "→"
+    },
+    "BR_DEC": {
+        "name": "Bright -",
+        "shortName": "BR -"
+    },
+    "BR_INC": {
+        "name": "Bright +",
+        "shortName": "BR +"
+    },
+    "EF_DEC": {
+        "name": "Effect -",
+        "shortName": "EF -"
+    },
+    "EF_INC": {
+        "name": "Effect +",
+        "shortName": "EF +"
+    },
+    "ES_DEC": {
+        "name": "Effect Speed -",
+        "shortName": "ES -"
+    },
+    "ES_INC": {
+        "name": "Effect Speed +",
+        "shortName": "ES +"
+    },
+    "H1_DEC": {
+        "name": "Color1 Hue -",
+        "shortName": "H1 -"
+    },
+    "H1_INC": {
+        "name": "Color1 Hue +",
+        "shortName": "H1 +"
+    },
+    "H2_DEC": {
+        "name": "Color2 Hue -",
+        "shortName": "H2 -"
+    },
+    "H2_INC": {
+        "name": "Color2 Hue +",
+        "shortName": "H2 +"
+    },
+    "S1_DEC": {
+        "name": "Color1 Sat -",
+        "shortName": "S1 -"
+    },
+    "S1_INC": {
+        "name": "Color1 Sat +",
+        "shortName": "S1 +"
+    },
+    "S2_DEC": {
+        "name": "Color2 Sat -",
+        "shortName": "S2 -"
+    },
+    "S2_INC": {
+        "name": "Color2 Sat +",
+        "shortName": "S2 +"
+    },
+    "KC_VOLD": {
+        "name": "Vol -"
+    },
+    "KC_VOLU": {
+        "name": "Vol +"
+    },
+    "KC_MUTE": {
+        "name": "Mute"
+    },
+    "KC_MPLY": {
+        "name": "Play"
+    },
+    "KC_MSTP": {
+        "name": "Media Stop"
+    },
+    "KC_MPRV": {
+        "name": "Previous"
+    },
+    "KC_MNXT": {
+        "name": "Next"
+    },
+    "KC_MRWD": {
+        "name": "Rewind"
+    },
+    "KC_MFFD": {
+        "name": "Fast Forward"
+    },
+    "KC_MSEL": {
+        "name": "Select"
+    },
+    "KC_EJCT": {
+        "name": "Eject"
+    },
+    "S(KC_GRV)": {
+        "name": "~"
+    },
+    "S(KC_1)": {
+        "name": "!"
+    },
+    "S(KC_2)": {
+        "name": "@"
+    },
+    "S(KC_3)": {
+        "name": "#"
+    },
+    "S(KC_4)": {
+        "name": "$"
+    },
+    "S(KC_5)": {
+        "name": "%"
+    },
+    "S(KC_6)": {
+        "name": "^"
+    },
+    "S(KC_7)": {
+        "name": "&"
+    },
+    "S(KC_8)": {
+        "name": "*"
+    },
+    "S(KC_9)": {
+        "name": "("
+    },
+    "S(KC_0)": {
+        "name": ")"
+    },
+    "S(KC_MINS)": {
+        "name": "_"
+    },
+    "S(KC_EQL)": {
+        "name": "+"
+    },
+    "S(KC_LBRC)": {
+        "name": "{"
+    },
+    "S(KC_RBRC)": {
+        "name": "}"
+    },
+    "S(KC_BSLS)": {
+        "name": "|"
+    },
+    "S(KC_SCLN)": {
+        "name": ":"
+    },
+    "S(KC_QUOT)": {
+        "name": "\""
+    },
+    "S(KC_COMM)": {
+        "name": "<"
+    },
+    "S(KC_DOT)": {
+        "name": ">"
+    },
+    "S(KC_SLSH)": {
+        "name": "?"
+    },
+    "KC_NUHS": {
+        "name": "NUHS"
+    },
+    "KC_NUBS": {
+        "name": "NUBS"
+    },
+    "KC_RO": {
+        "name": "Ro"
+    },
+    "KC_JYEN": {
+        "name": "¥"
+    },
+    "KC_MHEN": {
+        "name": "無変換"
+    },
+    "KC_HANJ": {
+        "name": "漢字"
+    },
+    "KC_HAEN": {
+        "name": "한영"
+    },
+    "KC_HENK": {
+        "name": "変換"
+    },
+    "KC_KANA": {
+        "name": "かな"
+    },
+    "KC_GESC": {
+        "name": "Esc `"
+    },
+    "KC_LSPO": {
+        "name": "LS ("
+    },
+    "KC_RSPC": {
+        "name": "RS )"
+    },
+    "KC_LCPO": {
+        "name": "LC ("
+    },
+    "KC_RCPC": {
+        "name": "RC )"
+    },
+    "KC_LAPO": {
+        "name": "LA ("
+    },
+    "KC_RAPC": {
+        "name": "RA )"
+    },
+    "KC_SFTENT": {
+        "name": "SftEnt"
+    },
+    "RESET": {
+        "name": "Reset"
+    },
+    "DEBUG": {
+        "name": "Debug"
+    },
+    "MAGIC_TOGGLE_NKRO": {
+        "name": "Toggle NKRO",
+        "shortName": "NKRO"
+    },
+    "KC_LNUM": {
+        "name": "Locking Num Lock"
+    },
+    "KC_LCAP": {
+        "name": "Locking Caps Lock"
+    },
+    "KC_LSCR": {
+        "name": "Locking Scroll Lock"
+    },
+    "KC_PWR": {
+        "name": "Power"
+    },
+    "KC_POWER": {
+        "name": "Power OSX"
+    },
+    "KC_SLEP": {
+        "name": "Sleep"
+    },
+    "KC_WAKE": {
+        "name": "Wake"
+    },
+    "KC_CALC": {
+        "name": "Calc"
+    },
+    "KC_MAIL": {
+        "name": "Mail"
+    },
+    "KC_HELP": {
+        "name": "Help"
+    },
+    "KC_STOP": {
+        "name": "Stop"
+    },
+    "KC_ERAS": {
+        "name": "Alt Erase"
+    },
+    "KC_AGAIN": {
+        "name": "Again"
+    },
+    "KC_MENU": {
+        "name": "Menu"
+    },
+    "KC_UNDO": {
+        "name": "Undo"
+    },
+    "KC_SELECT": {
+        "name": "Select"
+    },
+    "KC_EXECUTE": {
+        "name": "Exec"
+    },
+    "KC_CUT": {
+        "name": "Cut"
+    },
+    "KC_COPY": {
+        "name": "Copy"
+    },
+    "KC_PASTE": {
+        "name": "Paste"
+    },
+    "KC_FIND": {
+        "name": "Find"
+    },
+    "KC_MYCM": {
+        "name": "My Comp"
+    },
+    "KC_WWW_HOME": {
+        "name": "Home"
+    },
+    "KC_WWW_BACK": {
+        "name": "Back"
+    },
+    "KC_WWW_FORWARD": {
+        "name": "Forward"
+    },
+    "KC_WWW_STOP": {
+        "name": "Stop"
+    },
+    "KC_WWW_REFRESH": {
+        "name": "Refresh"
+    },
+    "KC_WWW_FAVORITES": {
+        "name": "Favorites"
+    },
+    "KC_WWW_SEARCH": {
+        "name": "Search"
+    },
+    "KC_BRIU": {
+        "name": "Screen +",
+        "shortName": "Scr +"
+    },
+    "KC_BRID": {
+        "name": "Screen -",
+        "shortName": "Scr -"
+    },
+    "KC_F13": {
+        "name": "F13"
+    },
+    "KC_F14": {
+        "name": "F14"
+    },
+    "KC_F15": {
+        "name": "F15"
+    },
+    "KC_F16": {
+        "name": "F16"
+    },
+    "KC_F17": {
+        "name": "F17"
+    },
+    "KC_F18": {
+        "name": "F18"
+    },
+    "KC_F19": {
+        "name": "F19"
+    },
+    "KC_F20": {
+        "name": "F20"
+    },
+    "KC_F21": {
+        "name": "F21"
+    },
+    "KC_F22": {
+        "name": "F22"
+    },
+    "KC_F23": {
+        "name": "F23"
+    },
+    "KC_F24": {
+        "name": "F24"
+    },
+    "KC_MS_UP": {
+        "name": "Mouse ↑"
+    },
+    "KC_MS_DOWN": {
+        "name": "Mouse ↓"
+    },
+    "KC_MS_LEFT": {
+        "name": "Mouse ←"
+    },
+    "KC_MS_RIGHT": {
+        "name": "Mouse →"
+    },
+    "KC_MS_BTN1": {
+        "name": "Mouse Btn1"
+    },
+    "KC_MS_BTN2": {
+        "name": "Mouse Btn2"
+    },
+    "KC_MS_BTN3": {
+        "name": "Mouse Btn3"
+    },
+    "KC_MS_BTN4": {
+        "name": "Mouse Btn4"
+    },
+    "KC_MS_BTN5": {
+        "name": "Mouse Btn5"
+    },
+    "KC_MS_BTN6": {
+        "name": "Mouse Btn6"
+    },
+    "KC_MS_BTN7": {
+        "name": "Mouse Btn7"
+    },
+    "KC_MS_BTN8": {
+        "name": "Mouse Btn8"
+    },
+    "KC_MS_WH_UP": {
+        "name": "Mouse Wh ↑"
+    },
+    "KC_MS_WH_DOWN": {
+        "name": "Mouse Wh ↓"
+    },
+    "KC_MS_WH_LEFT": {
+        "name": "Mouse Wh ←"
+    },
+    "KC_MS_WH_RIGHT": {
+        "name": "Mouse Wh →"
+    },
+    "KC_MS_ACCEL0": {
+        "name": "Mouse Acc0"
+    },
+    "KC_MS_ACCEL1": {
+        "name": "Mouse Acc1"
+    },
+    "KC_MS_ACCEL2": {
+        "name": "Mouse Acc2"
+    },
+    "AU_ON": {
+        "name": "Audio On"
+    },
+    "AU_OFF": {
+        "name": "Audio Off"
+    },
+    "AU_TOG": {
+        "name": "Audio Toggle"
+    },
+    "CLICKY_TOGGLE": {
+        "name": "Clicky Toggle"
+    },
+    "CLICKY_ENABLE": {
+        "name": "Clicky Enable"
+    },
+    "CLICKY_DISABLE": {
+        "name": "Clicky Disable"
+    },
+    "CLICKY_UP": {
+        "name": "Clicky Up"
+    },
+    "CLICKY_DOWN": {
+        "name": "Clicky Down"
+    },
+    "CLICKY_RESET": {
+        "name": "Clicky Reset"
+    },
+    "MU_ON": {
+        "name": "Music On"
+    },
+    "MU_OFF": {
+        "name": "Music Off"
+    },
+    "MU_TOG": {
+        "name": "Music Toggle"
+    },
+    "MU_MOD": {
+        "name": "Music Mode"
+    },
+    "BL_TOGG": {
+        "name": "BL Toggle"
+    },
+    "BL_ON": {
+        "name": "BL On"
+    },
+    "BL_OFF": {
+        "name": "BL Off",
+        "shortName": "BL Off"
+    },
+    "BL_DEC": {
+        "name": "BL -"
+    },
+    "BL_INC": {
+        "name": "BL +"
+    },
+    "BL_STEP": {
+        "name": "BL Cycle"
+    },
+    "BL_BRTG": {
+        "name": "BR Toggle"
+    },
+    "RGB_TOG": {
+        "name": "RGB Toggle"
+    },
+    "RGB_RMOD": {
+        "name": "RGB Mode -"
+    },
+    "RGB_MOD": {
+        "name": "RGB Mode +"
+    },
+    "RGB_HUD": {
+        "name": "Hue -"
+    },
+    "RGB_HUI": {
+        "name": "Hue +"
+    },
+    "RGB_SAD": {
+        "name": "Sat -"
+    },
+    "RGB_SAI": {
+        "name": "Sat +"
+    },
+    "RGB_VAD": {
+        "name": "Bright -"
+    },
+    "RGB_VAI": {
+        "name": "Bright +"
+    },
+    "RGB_SPD": {
+        "name": "Effect Speed-"
+    },
+    "RGB_SPI": {
+        "name": "Effect Speed+"
+    },
+    "RGB_M_P": {
+        "name": "RGB Mode P"
+    },
+    "RGB_M_B": {
+        "name": "RGB Mode B"
+    },
+    "RGB_M_R": {
+        "name": "RGB Mode R"
+    },
+    "RGB_M_SW": {
+        "name": "RGB Mode SW"
+    },
+    "RGB_M_SN": {
+        "name": "RGB Mode SN"
+    },
+    "RGB_M_K": {
+        "name": "RGB Mode K"
+    },
+    "RGB_M_X": {
+        "name": "RGB Mode X"
+    },
+    "RGB_M_G": {
+        "name": "RGB Mode G"
+    }
+}

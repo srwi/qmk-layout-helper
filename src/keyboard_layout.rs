@@ -17,14 +17,21 @@ pub struct KeyboardLayout {
 }
 
 impl KeyboardLayout {
-    pub fn new(json_path: &str) -> Result<Self, Box<dyn std::error::Error>> {
+    pub fn new(json_path: &str, layout_name: &str) -> Result<Self, Box<dyn std::error::Error>> {
         let file = File::open(json_path)?;
         let reader = BufReader::new(file);
         let json: Value = serde_json::from_reader(reader)?;
 
-        let mut keys = Vec::new();
-        let layout = &json["layouts"]["LAYOUT"]["layout"];
+        let layout = if json["layouts"].get(layout_name).is_some() {
+            &json["layouts"][layout_name]["layout"]
+        } else if let Some(alias) = json["layout_aliases"].get(layout_name) {
+            let alias_name = alias.as_str().ok_or("Invalid alias format")?;
+            &json["layouts"][alias_name]["layout"]
+        } else {
+            return Err(format!("Layout '{}' not found and no matching alias", layout_name).into());
+        };
 
+        let mut keys = Vec::new();
         for key in layout.as_array().unwrap() {
             let matrix: Vec<usize> = key["matrix"]
                 .as_array()
