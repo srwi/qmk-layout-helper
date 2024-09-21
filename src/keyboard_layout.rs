@@ -1,22 +1,29 @@
+use qmk_via_api::api;
 use serde_json::Value;
 use std::fs::File;
 use std::io::BufReader;
+use std::num::ParseIntError;
 
 #[derive(Debug, Clone)]
 pub struct Key {
-    pub label: String,
-    pub matrix: (usize, usize),
+    pub row: api::Row,
+    pub col: api::Column,
     pub x: f32,
     pub y: f32,
     pub w: f32,
     pub h: f32,
 }
 
-pub struct KeyboardLayout {
+#[derive(Clone)]
+pub struct KeyboardInfo {
+    pub vid: u16,
+    pub pid: u16,
+    pub rows: usize,
+    pub cols: usize,
     pub keys: Vec<Key>,
 }
 
-impl KeyboardLayout {
+impl KeyboardInfo {
     pub fn new(json_path: &str, layout_name: &str) -> Result<Self, Box<dyn std::error::Error>> {
         let file = File::open(json_path)?;
         let reader = BufReader::new(file);
@@ -40,15 +47,14 @@ impl KeyboardLayout {
                 .map(|v| v.as_u64().unwrap() as usize)
                 .collect();
 
-            let label = key["label"].as_str().unwrap_or("").to_string();
             let x = key["x"].as_f64().unwrap_or(0.0) as f32;
             let y = key["y"].as_f64().unwrap_or(0.0) as f32;
             let w = key["w"].as_f64().unwrap_or(1.0) as f32;
             let h = key["h"].as_f64().unwrap_or(1.0) as f32;
 
             keys.push(Key {
-                label,
-                matrix: (matrix[0], matrix[1]),
+                row: matrix[0] as api::Row,
+                col: matrix[1] as api::Layer,
                 x,
                 y,
                 w,
@@ -56,12 +62,29 @@ impl KeyboardLayout {
             });
         }
 
-        Ok(KeyboardLayout { keys })
+        let rows = json["matrix_size"].get("rows").unwrap().as_i64().unwrap() as usize;
+        let cols = json["matrix_size"].get("cols").unwrap().as_i64().unwrap() as usize;
+
+        let vid = Self::hex_to_u16(json["usb"].get("vid").unwrap().as_str().unwrap()).unwrap();
+        let pid = Self::hex_to_u16(json["usb"].get("pid").unwrap().as_str().unwrap()).unwrap();
+
+        Ok(KeyboardInfo {
+            vid,
+            pid,
+            rows,
+            cols,
+            keys,
+        })
     }
 
     pub fn get_dimensions(&self) -> (f32, f32) {
         let max_x = self.keys.iter().map(|k| k.x + k.w).fold(0.0, f32::max);
         let max_y = self.keys.iter().map(|k| k.y + k.h).fold(0.0, f32::max);
         (max_x, max_y)
+    }
+
+    fn hex_to_u16(hex_string: &str) -> Result<u16, ParseIntError> {
+        let cleaned_hex = hex_string.trim_start_matches("0x");
+        u16::from_str_radix(cleaned_hex, 16)
     }
 }

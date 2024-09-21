@@ -1,23 +1,25 @@
 use std::{cmp::min, ffi::c_double};
 
 use crate::egui::ViewportCommand;
-use eframe::egui;
-use keyboard_layout::KeyboardLayout;
+use eframe::egui::{self, debug_text::print, TextBuffer};
+use keyboard_layout::KeyboardInfo;
+mod keyboard;
 mod keyboard_layout;
 use clap::Parser;
+use keyboard::Keyboard;
 use std::path::PathBuf;
 
 struct Overlay {
-    keyboard_layout: KeyboardLayout,
+    keyboard: Keyboard,
 }
 
 impl Overlay {
-    fn new(keyboard_layout: KeyboardLayout) -> Self {
-        Self { keyboard_layout }
+    fn new(keyboard: Keyboard) -> Self {
+        Self { keyboard }
     }
 
     fn calculate_unit_size(&self, available_width: f32, available_height: f32) -> f32 {
-        let (layout_width, layout_height) = self.keyboard_layout.get_dimensions();
+        let (layout_width, layout_height) = self.keyboard.keyboard_info.get_dimensions();
         let width_ratio = available_width / layout_width;
         let height_ratio = available_height / layout_height;
         width_ratio.min(height_ratio)
@@ -40,7 +42,7 @@ impl eframe::App for Overlay {
             let available_rect = ui.available_size();
             let unit_size = self.calculate_unit_size(available_rect.x, available_rect.y);
 
-            for key in &self.keyboard_layout.keys {
+            for key in &self.keyboard.keyboard_info.keys {
                 let rect = egui::Rect::from_min_size(
                     egui::pos2(key.x * unit_size, key.y * unit_size),
                     egui::vec2(key.w * unit_size, key.h * unit_size),
@@ -53,8 +55,8 @@ impl eframe::App for Overlay {
                     egui::Stroke::NONE,
                 );
 
-                let font = egui::FontId::proportional(0.5 * unit_size);
-                let text = key.label.as_str();
+                let font = egui::FontId::proportional(0.25 * unit_size);
+                let text = self.keyboard.matrix[0][key.row as usize][key.col as usize].as_ref();
 
                 let galley = ui.painter().layout_no_wrap(
                     text.to_string(),
@@ -108,8 +110,9 @@ fn main() -> Result<(), eframe::Error> {
     let keyboard_config = cli.keyboard_config.to_str().expect("Invalid path");
     let layout_name = &cli.layout_name;
 
-    let keyboard_layout = KeyboardLayout::new(&keyboard_config, &layout_name)
-        .expect("Failed to read keyboard layout.");
+    let keyboard_info =
+        KeyboardInfo::new(&keyboard_config, &layout_name).expect("Failed to read keyboard layout.");
+    let keyboard = Keyboard::new(keyboard_info.clone());
 
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
@@ -124,6 +127,6 @@ fn main() -> Result<(), eframe::Error> {
     eframe::run_native(
         "QMK Layout Helper",
         options,
-        Box::new(|_cc| Ok(Box::<Overlay>::new(Overlay::new(keyboard_layout)))),
+        Box::new(|_cc| Ok(Box::<Overlay>::new(Overlay::new(keyboard)))),
     )
 }
