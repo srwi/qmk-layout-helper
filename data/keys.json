@@ -2,10 +2,10 @@
     "KC_NO": {
         "name": ""
     },
-    "KC_TRNS": {
+    "KC_TRANSPARENT": {
         "name": "▽"
     },
-    "KC_ESC": {
+    "KC_ESCAPE": {
         "name": "Esc"
     },
     "KC_A": {
@@ -116,43 +116,43 @@
     "KC_0": {
         "name": ")\n0"
     },
-    "KC_MINS": {
+    "KC_MINUS": {
         "name": "_\n-"
     },
-    "KC_EQL": {
+    "KC_EQUAL": {
         "name": "+\n="
     },
-    "KC_GRV": {
+    "KC_GRAVE": {
         "name": "~\n`"
     },
-    "KC_LBRC": {
+    "KC_LEFT_BRACKET": {
         "name": "{\n["
     },
-    "KC_RBRC": {
+    "KC_RIGHT_BRACKET": {
         "name": "}\n]"
     },
-    "KC_BSLS": {
+    "KC_BACKSLASH": {
         "name": "|\n\\"
     },
-    "KC_SCLN": {
+    "KC_SEMICOLON": {
         "name": ":\n;"
     },
-    "KC_QUOT": {
+    "KC_QUOTE": {
         "name": "\"\n\""
     },
-    "KC_COMM": {
+    "KC_COMMA": {
         "name": "<\n,"
     },
     "KC_DOT": {
         "name": ">\n."
     },
-    "KC_SLSH": {
+    "KC_SLASH": {
         "name": "?\n/"
     },
-    "KC_PEQL": {
+    "KC_KP_EQUAL": {
         "name": "="
     },
-    "KC_PCMM": {
+    "KC_KP_COMMA": {
         "name": ","
     },
     "KC_F1": {
@@ -191,29 +191,29 @@
     "KC_F12": {
         "name": "F12"
     },
-    "KC_PSCR": {
+    "KC_PRINT_SCREEN": {
         "name": "Print Screen",
-        "shortName": "Print"
+        "short_name": "Print"
     },
-    "KC_SLCK": {
+    "KC_SCROLL_LOCK": {
         "name": "Scroll Lock",
-        "shortName": "Scroll"
+        "short_name": "Scroll"
     },
-    "KC_PAUS": {
+    "KC_PAUSE": {
         "name": "Pause"
     },
     "KC_TAB": {
         "name": "Tab"
     },
-    "KC_BSPC": {
+    "KC_BACKSPACE": {
         "name": "Backspace",
-        "shortName": "Bksp"
+        "short_name": "Bksp"
     },
-    "KC_INS": {
+    "KC_INSERT": {
         "name": "Insert",
-        "shortName": "Ins"
+        "short_name": "Ins"
     },
-    "KC_DEL": {
+    "KC_DELETE": {
         "name": "Del"
     },
     "KC_HOME": {
@@ -222,214 +222,214 @@
     "KC_END": {
         "name": "End"
     },
-    "KC_PGUP": {
+    "KC_PAGE_UP": {
         "name": "Page Up",
-        "shortName": "PgUp"
+        "short_name": "PgUp"
     },
-    "KC_PGDN": {
+    "KC_PAGE_DOWN": {
         "name": "Page Down",
-        "shortName": "PgDn"
+        "short_name": "PgDn"
     },
-    "KC_NLCK": {
+    "KC_NUM_LOCK": {
         "name": "Num\nLock",
-        "shortName": "N.Lck"
+        "short_name": "N.Lck"
     },
-    "KC_CAPS": {
+    "KC_CAPS_LOCK": {
         "name": "Caps Lock"
     },
-    "KC_ENT": {
+    "KC_ENTER": {
         "name": "Enter"
     },
-    "KC_P1": {
+    "KC_KP_1": {
         "name": "1"
     },
-    "KC_P2": {
+    "KC_KP_2": {
         "name": "2"
     },
-    "KC_P3": {
+    "KC_KP_3": {
         "name": "3"
     },
-    "KC_P4": {
+    "KC_KP_4": {
         "name": "4"
     },
-    "KC_P5": {
+    "KC_KP_5": {
         "name": "5"
     },
-    "KC_P6": {
+    "KC_KP_6": {
         "name": "6"
     },
-    "KC_P7": {
+    "KC_KP_7": {
         "name": "7"
     },
-    "KC_P8": {
+    "KC_KP_8": {
         "name": "8"
     },
-    "KC_P9": {
+    "KC_KP_9": {
         "name": "9"
     },
-    "KC_P0": {
+    "KC_KP_0": {
         "name": "0"
     },
-    "KC_PSLS": {
+    "KC_KP_SLASH": {
         "name": "÷"
     },
-    "KC_PAST": {
+    "KC_KP_ASTERISK": {
         "name": "×"
     },
-    "KC_PMNS": {
+    "KC_KP_MINUS": {
         "name": "-"
     },
-    "KC_PPLS": {
+    "KC_KP_PLUS": {
         "name": "+"
     },
-    "KC_PDOT": {
+    "KC_KP_DOT": {
         "name": "."
     },
-    "KC_PENT": {
+    "KC_KP_ENTER": {
         "name": "Num\nEnter",
-        "shortName": "N.Ent"
+        "short_name": "N.Ent"
     },
-    "KC_LSFT": {
+    "KC_LEFT_SHIFT": {
         "name": "Left Shift",
-        "shortName": "LShft"
+        "short_name": "LShft"
     },
-    "KC_RSFT": {
+    "KC_RIGHT_SHIFT": {
         "name": "Right Shift",
-        "shortName": "RShft"
+        "short_name": "RShft"
     },
-    "KC_LCTL": {
+    "KC_LEFT_CTRL": {
         "name": "Left Ctrl"
     },
-    "KC_RCTL": {
+    "KC_RIGHT_CTRL": {
         "name": "Right Ctrl",
-        "shortName": "RCtl"
+        "short_name": "RCtl"
     },
-    "KC_LGUI": {
+    "KC_LEFT_GUI": {
         "name": "Left Win",
-        "shortName": "LWin"
+        "short_name": "LWin"
     },
-    "KC_RGUI": {
+    "KC_RIGHT_GUI": {
         "name": "Right Win",
-        "shortName": "RWin"
+        "short_name": "RWin"
     },
-    "KC_LALT": {
+    "KC_LEFT_ALT": {
         "name": "Left Alt",
-        "shortName": "LAlt"
+        "short_name": "LAlt"
     },
-    "KC_RALT": {
+    "KC_RIGHT_ALT": {
         "name": "Right Alt",
-        "shortName": "RAlt"
+        "short_name": "RAlt"
     },
-    "KC_SPC": {
+    "KC_SPACE": {
         "name": "Space"
     },
-    "KC_APP": {
+    "KC_APPLICATION": {
         "name": "Menu",
-        "shortName": "RApp"
+        "short_name": "RApp"
     },
     "KC_LEFT": {
         "name": "Left",
-        "shortName": "←"
+        "short_name": "←"
     },
     "KC_DOWN": {
         "name": "Down",
-        "shortName": "↓"
+        "short_name": "↓"
     },
     "KC_UP": {
         "name": "Up",
-        "shortName": "↑"
+        "short_name": "↑"
     },
-    "KC_RGHT": {
+    "KC_RIGHT": {
         "name": "Right",
-        "shortName": "→"
+        "short_name": "→"
     },
     "BR_DEC": {
         "name": "Bright -",
-        "shortName": "BR -"
+        "short_name": "BR -"
     },
     "BR_INC": {
         "name": "Bright +",
-        "shortName": "BR +"
+        "short_name": "BR +"
     },
     "EF_DEC": {
         "name": "Effect -",
-        "shortName": "EF -"
+        "short_name": "EF -"
     },
     "EF_INC": {
         "name": "Effect +",
-        "shortName": "EF +"
+        "short_name": "EF +"
     },
     "ES_DEC": {
         "name": "Effect Speed -",
-        "shortName": "ES -"
+        "short_name": "ES -"
     },
     "ES_INC": {
         "name": "Effect Speed +",
-        "shortName": "ES +"
+        "short_name": "ES +"
     },
     "H1_DEC": {
         "name": "Color1 Hue -",
-        "shortName": "H1 -"
+        "short_name": "H1 -"
     },
     "H1_INC": {
         "name": "Color1 Hue +",
-        "shortName": "H1 +"
+        "short_name": "H1 +"
     },
     "H2_DEC": {
         "name": "Color2 Hue -",
-        "shortName": "H2 -"
+        "short_name": "H2 -"
     },
     "H2_INC": {
         "name": "Color2 Hue +",
-        "shortName": "H2 +"
+        "short_name": "H2 +"
     },
     "S1_DEC": {
         "name": "Color1 Sat -",
-        "shortName": "S1 -"
+        "short_name": "S1 -"
     },
     "S1_INC": {
         "name": "Color1 Sat +",
-        "shortName": "S1 +"
+        "short_name": "S1 +"
     },
     "S2_DEC": {
         "name": "Color2 Sat -",
-        "shortName": "S2 -"
+        "short_name": "S2 -"
     },
     "S2_INC": {
         "name": "Color2 Sat +",
-        "shortName": "S2 +"
+        "short_name": "S2 +"
     },
-    "KC_VOLD": {
+    "KC_AUDIO_VOL_DOWN": {
         "name": "Vol -"
     },
-    "KC_VOLU": {
+    "KC_AUDIO_VOL_UP": {
         "name": "Vol +"
     },
-    "KC_MUTE": {
+    "KC_AUDIO_MUTE": {
         "name": "Mute"
     },
-    "KC_MPLY": {
+    "KC_MEDIA_PLAY_PAUSE": {
         "name": "Play"
     },
-    "KC_MSTP": {
+    "KC_MEDIA_STOP": {
         "name": "Media Stop"
     },
-    "KC_MPRV": {
+    "KC_MEDIA_PREV_TRACK": {
         "name": "Previous"
     },
-    "KC_MNXT": {
+    "KC_MEDIA_NEXT_TRACK": {
         "name": "Next"
     },
-    "KC_MRWD": {
+    "KC_MEDIA_REWIND": {
         "name": "Rewind"
     },
-    "KC_MFFD": {
+    "KC_MEDIA_FAST_FORWARD": {
         "name": "Fast Forward"
     },
-    "KC_MSEL": {
+    "KC_MEDIA_SELECT": {
         "name": "Select"
     },
-    "KC_EJCT": {
+    "KC_MEDIA_EJECT": {
         "name": "Eject"
     },
     "S(KC_GRV)": {
@@ -495,55 +495,55 @@
     "S(KC_SLSH)": {
         "name": "?"
     },
-    "KC_NUHS": {
+    "KC_NONUS_HASH": {
         "name": "NUHS"
     },
-    "KC_NUBS": {
+    "KC_NONUS_BACKSLASH": {
         "name": "NUBS"
     },
     "KC_RO": {
         "name": "Ro"
     },
-    "KC_JYEN": {
+    "KC_INTERNATIONAL_3": {
         "name": "¥"
     },
-    "KC_MHEN": {
+    "KC_INTERNATIONAL_5": {
         "name": "無変換"
     },
-    "KC_HANJ": {
+    "KC_LANGUAGE_2": {
         "name": "漢字"
     },
-    "KC_HAEN": {
+    "KC_LANGUAGE_1": {
         "name": "한영"
     },
-    "KC_HENK": {
+    "KC_INTERNATIONAL_4": {
         "name": "変換"
     },
-    "KC_KANA": {
+    "KC_INTERNATIONAL_2": {
         "name": "かな"
     },
-    "KC_GESC": {
+    "QK_GRAVE_ESCAPE": {
         "name": "Esc `"
     },
-    "KC_LSPO": {
+    "QK_SPACE_CADET_LEFT_SHIFT_PARENTHESIS_OPEN": {
         "name": "LS ("
     },
-    "KC_RSPC": {
+    "QK_SPACE_CADET_RIGHT_SHIFT_PARENTHESIS_CLOSE": {
         "name": "RS )"
     },
-    "KC_LCPO": {
+    "QK_SPACE_CADET_LEFT_CTRL_PARENTHESIS_OPEN": {
         "name": "LC ("
     },
-    "KC_RCPC": {
+    "QK_SPACE_CADET_RIGHT_CTRL_PARENTHESIS_CLOSE": {
         "name": "RC )"
     },
-    "KC_LAPO": {
+    "QK_SPACE_CADET_LEFT_ALT_PARENTHESIS_OPEN": {
         "name": "LA ("
     },
-    "KC_RAPC": {
+    "QK_SPACE_CADET_RIGHT_ALT_PARENTHESIS_CLOSE": {
         "name": "RA )"
     },
-    "KC_SFTENT": {
+    "QK_SPACE_CADET_RIGHT_SHIFT_ENTER": {
         "name": "SftEnt"
     },
     "RESET": {
@@ -552,32 +552,32 @@
     "DEBUG": {
         "name": "Debug"
     },
-    "MAGIC_TOGGLE_NKRO": {
+    "QK_MAGIC_TOGGLE_NKRO": {
         "name": "Toggle NKRO",
-        "shortName": "NKRO"
+        "short_name": "NKRO"
     },
-    "KC_LNUM": {
+    "KC_LOCKING_NUM_LOCK": {
         "name": "Locking Num Lock"
     },
-    "KC_LCAP": {
+    "KC_LOCKING_CAPS_LOCK": {
         "name": "Locking Caps Lock"
     },
-    "KC_LSCR": {
+    "KC_LOCKING_SCROLL_LOCK": {
         "name": "Locking Scroll Lock"
     },
-    "KC_PWR": {
+    "KC_SYSTEM_POWER": {
         "name": "Power"
     },
     "KC_POWER": {
         "name": "Power OSX"
     },
-    "KC_SLEP": {
+    "KC_SYSTEM_SLEEP": {
         "name": "Sleep"
     },
-    "KC_WAKE": {
+    "KC_SYSTEM_WAKE": {
         "name": "Wake"
     },
-    "KC_CALC": {
+    "KC_CALCULATOR": {
         "name": "Calc"
     },
     "KC_MAIL": {
@@ -589,7 +589,7 @@
     "KC_STOP": {
         "name": "Stop"
     },
-    "KC_ERAS": {
+    "KC_ALTERNATE_ERASE": {
         "name": "Alt Erase"
     },
     "KC_AGAIN": {
@@ -619,7 +619,7 @@
     "KC_FIND": {
         "name": "Find"
     },
-    "KC_MYCM": {
+    "KC_MY_COMPUTER": {
         "name": "My Comp"
     },
     "KC_WWW_HOME": {
@@ -643,13 +643,13 @@
     "KC_WWW_SEARCH": {
         "name": "Search"
     },
-    "KC_BRIU": {
+    "KC_BRIGHTNESS_UP": {
         "name": "Screen +",
-        "shortName": "Scr +"
+        "short_name": "Scr +"
     },
-    "KC_BRID": {
+    "KC_BRIGHTNESS_DOWN": {
         "name": "Screen -",
-        "shortName": "Scr -"
+        "short_name": "Scr -"
     },
     "KC_F13": {
         "name": "F13"
@@ -687,179 +687,185 @@
     "KC_F24": {
         "name": "F24"
     },
-    "KC_MS_UP": {
+    "QK_MOUSE_CURSOR_UP": {
         "name": "Mouse ↑"
     },
-    "KC_MS_DOWN": {
+    "QK_MOUSE_CURSOR_DOWN": {
         "name": "Mouse ↓"
     },
-    "KC_MS_LEFT": {
+    "QK_MOUSE_CURSOR_LEFT": {
         "name": "Mouse ←"
     },
-    "KC_MS_RIGHT": {
+    "QK_MOUSE_CURSOR_RIGHT": {
         "name": "Mouse →"
     },
-    "KC_MS_BTN1": {
+    "QK_MOUSE_BUTTON_1": {
         "name": "Mouse Btn1"
     },
-    "KC_MS_BTN2": {
+    "QK_MOUSE_BUTTON_2": {
         "name": "Mouse Btn2"
     },
-    "KC_MS_BTN3": {
+    "QK_MOUSE_BUTTON_3": {
         "name": "Mouse Btn3"
     },
-    "KC_MS_BTN4": {
+    "QK_MOUSE_BUTTON_4": {
         "name": "Mouse Btn4"
     },
-    "KC_MS_BTN5": {
+    "QK_MOUSE_BUTTON_5": {
         "name": "Mouse Btn5"
     },
-    "KC_MS_BTN6": {
+    "QK_MOUSE_BUTTON_6": {
         "name": "Mouse Btn6"
     },
-    "KC_MS_BTN7": {
+    "QK_MOUSE_BUTTON_7": {
         "name": "Mouse Btn7"
     },
-    "KC_MS_BTN8": {
+    "QK_MOUSE_BUTTON_8": {
         "name": "Mouse Btn8"
     },
-    "KC_MS_WH_UP": {
+    "QK_MOUSE_WHEEL_UP": {
         "name": "Mouse Wh ↑"
     },
-    "KC_MS_WH_DOWN": {
+    "QK_MOUSE_WHEEL_DOWN": {
         "name": "Mouse Wh ↓"
     },
-    "KC_MS_WH_LEFT": {
+    "QK_MOUSE_WHEEL_LEFT": {
         "name": "Mouse Wh ←"
     },
-    "KC_MS_WH_RIGHT": {
+    "QK_MOUSE_WHEEL_RIGHT": {
         "name": "Mouse Wh →"
     },
-    "KC_MS_ACCEL0": {
+    "QK_MOUSE_ACCELERATION_0": {
         "name": "Mouse Acc0"
     },
-    "KC_MS_ACCEL1": {
+    "QK_MOUSE_ACCELERATION_1": {
         "name": "Mouse Acc1"
     },
-    "KC_MS_ACCEL2": {
+    "QK_MOUSE_ACCELERATION_2": {
         "name": "Mouse Acc2"
     },
-    "AU_ON": {
+    "QK_AUDIO_ON": {
         "name": "Audio On"
     },
-    "AU_OFF": {
+    "QK_AUDIO_OFF": {
         "name": "Audio Off"
     },
-    "AU_TOG": {
+    "QK_AUDIO_TOGGLE": {
         "name": "Audio Toggle"
     },
-    "CLICKY_TOGGLE": {
+    "QK_AUDIO_CLICKY_TOGGLE": {
         "name": "Clicky Toggle"
     },
-    "CLICKY_ENABLE": {
+    "QK_AUDIO_CLICKY_ON": {
         "name": "Clicky Enable"
     },
-    "CLICKY_DISABLE": {
+    "QK_AUDIO_CLICKY_OFF": {
         "name": "Clicky Disable"
     },
-    "CLICKY_UP": {
+    "QK_AUDIO_CLICKY_UP": {
         "name": "Clicky Up"
     },
-    "CLICKY_DOWN": {
+    "QK_AUDIO_CLICKY_DOWN": {
         "name": "Clicky Down"
     },
-    "CLICKY_RESET": {
+    "QK_AUDIO_CLICKY_RESET": {
         "name": "Clicky Reset"
     },
-    "MU_ON": {
+    "QK_MUSIC_ON": {
         "name": "Music On"
     },
-    "MU_OFF": {
+    "QK_MUSIC_OFF": {
         "name": "Music Off"
     },
-    "MU_TOG": {
+    "QK_MUSIC_TOGGLE": {
         "name": "Music Toggle"
     },
-    "MU_MOD": {
+    "QK_MUSIC_MODE_NEXT": {
         "name": "Music Mode"
     },
-    "BL_TOGG": {
+    "QK_BACKLIGHT_TOGGLE": {
         "name": "BL Toggle"
     },
-    "BL_ON": {
+    "QK_BACKLIGHT_ON": {
         "name": "BL On"
     },
-    "BL_OFF": {
+    "QK_BACKLIGHT_OFF": {
         "name": "BL Off",
-        "shortName": "BL Off"
+        "short_name": "BL Off"
     },
-    "BL_DEC": {
+    "QK_BACKLIGHT_DOWN": {
         "name": "BL -"
     },
-    "BL_INC": {
+    "QK_BACKLIGHT_UP": {
         "name": "BL +"
     },
-    "BL_STEP": {
+    "QK_BACKLIGHT_STEP": {
         "name": "BL Cycle"
     },
-    "BL_BRTG": {
+    "QK_BACKLIGHT_TOGGLE_BREATHING": {
         "name": "BR Toggle"
     },
-    "RGB_TOG": {
+    "QK_LED_MATRIX_TOGGLE": {
         "name": "RGB Toggle"
     },
-    "RGB_RMOD": {
+    "QK_LED_MATRIX_MODE_PREVIOUS": {
         "name": "RGB Mode -"
     },
-    "RGB_MOD": {
+    "QK_LED_MATRIX_MODE_NEXT": {
         "name": "RGB Mode +"
     },
-    "RGB_HUD": {
+    "QK_UNDERGLOW_HUE_DOWN": {
         "name": "Hue -"
     },
-    "RGB_HUI": {
+    "QK_UNDERGLOW_HUE_UP": {
         "name": "Hue +"
     },
-    "RGB_SAD": {
+    "QK_UNDERGLOW_SATURATION_DOWN": {
         "name": "Sat -"
     },
-    "RGB_SAI": {
+    "QK_UNDERGLOW_SATURATION_UP": {
         "name": "Sat +"
     },
-    "RGB_VAD": {
+    "QK_UNDERGLOW_VALUE_DOWN": {
         "name": "Bright -"
     },
-    "RGB_VAI": {
+    "QK_UNDERGLOW_VALUE_UP": {
         "name": "Bright +"
     },
-    "RGB_SPD": {
+    "QK_UNDERGLOW_SPEED_DOWN": {
         "name": "Effect Speed-"
     },
-    "RGB_SPI": {
+    "QK_UNDERGLOW_SPEED_UP": {
         "name": "Effect Speed+"
     },
-    "RGB_M_P": {
+    "RGB_MODE_PLAIN": {
         "name": "RGB Mode P"
     },
-    "RGB_M_B": {
+    "RGB_MODE_BREATHE": {
         "name": "RGB Mode B"
     },
-    "RGB_M_R": {
+    "RGB_MODE_RAINBOW": {
         "name": "RGB Mode R"
     },
-    "RGB_M_SW": {
+    "RGB_MODE_SWIRL": {
         "name": "RGB Mode SW"
     },
-    "RGB_M_SN": {
+    "RGB_MODE_SNAKE": {
         "name": "RGB Mode SN"
     },
-    "RGB_M_K": {
+    "RGB_MODE_KNIGHT": {
         "name": "RGB Mode K"
     },
-    "RGB_M_X": {
+    "RGB_MODE_XMAS": {
         "name": "RGB Mode X"
     },
-    "RGB_M_G": {
+    "RGB_MODE_GRADIENT": {
         "name": "RGB Mode G"
+    },
+    "RGB_MODE_RGBTEST": {
+        "name": "RGB Mode Test"
+    },
+    "RGB_MODE_TWINKLE": {
+        "name": "RGB Mode T"
     }
 }

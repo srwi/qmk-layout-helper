@@ -14,3 +14,4 @@ eframe = "0.28.1"
 #qmk-via-api = "0.0.1"
 qmk-via-api = { path = "../rust-via-api" }
 serde_json = "1.0.128"
+serde = { version = "1.0.210", features = ["derive"] }

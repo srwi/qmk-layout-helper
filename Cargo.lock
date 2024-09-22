@@ -2408,6 +2408,7 @@ dependencies = [
  "clap",
  "eframe",
  "qmk-via-api",
+ "serde",
  "serde_json",
 ]
 

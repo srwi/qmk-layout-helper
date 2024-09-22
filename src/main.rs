@@ -1,3 +1,4 @@
+use std::fmt::Debug;
 use std::{cmp::min, ffi::c_double};
 
 use crate::egui::ViewportCommand;
@@ -7,15 +8,24 @@ mod keyboard;
 mod keyboard_layout;
 use clap::Parser;
 use keyboard::Keyboard;
+use serde::{Deserialize, Serialize};
+use serde_json::Value;
+use std::collections::HashMap;
+use std::fs::File;
+use std::io::BufReader;
 use std::path::PathBuf;
 
 struct Overlay {
     keyboard: Keyboard,
+    keycode_label_map: HashMap<String, KeycodeInfo>,
 }
 
 impl Overlay {
-    fn new(keyboard: Keyboard) -> Self {
-        Self { keyboard }
+    fn new(keyboard: Keyboard, keycode_label_map: HashMap<String, KeycodeInfo>) -> Self {
+        Self {
+            keyboard,
+            keycode_label_map,
+        }
     }
 
     fn calculate_unit_size(&self, available_width: f32, available_height: f32) -> f32 {
@@ -56,17 +66,21 @@ impl eframe::App for Overlay {
                 );
 
                 let font = egui::FontId::proportional(0.25 * unit_size);
-                let text = self.keyboard.matrix[0][key.row as usize][key.col as usize].as_ref();
+                let keycode_str =
+                    self.keyboard.matrix[0][key.row as usize][key.col as usize].as_ref();
+                let text = self
+                    .keycode_label_map
+                    .get(keycode_str)
+                    .map(|info| info.name.clone())
+                    .unwrap_or(keycode_str.to_string());
 
-                let galley = ui.painter().layout_no_wrap(
-                    text.to_string(),
-                    font.clone(),
-                    egui::Color32::WHITE,
-                );
+                let galley =
+                    ui.painter()
+                        .layout_no_wrap(text.clone(), font.clone(), egui::Color32::WHITE);
 
                 let truncated_text = if galley.rect.width() > rect.width() {
                     // TODO: Later this should be replaced with the short key code display name
-                    let mut truncated = text.to_string();
+                    let mut truncated = text;
                     while truncated.len() > 1 {
                         truncated.pop();
                         let temp_galley = ui.painter().layout_no_wrap(
@@ -80,7 +94,7 @@ impl eframe::App for Overlay {
                     }
                     format!("{}...", truncated)
                 } else {
-                    text.to_string()
+                    text
                 };
 
                 let final_galley =
@@ -96,6 +110,18 @@ impl eframe::App for Overlay {
     }
 }
 
+#[derive(Debug, Deserialize, Serialize)]
+struct KeycodeInfo {
+    name: String,
+
+    #[serde(default = "empty_string")]
+    short_name: String,
+}
+
+fn empty_string() -> String {
+    "".to_string()
+}
+
 #[derive(Parser)]
 struct Cli {
     keyboard_config: PathBuf,
@@ -109,6 +135,11 @@ fn main() -> Result<(), eframe::Error> {
 
     let keyboard_config = cli.keyboard_config.to_str().expect("Invalid path");
     let layout_name = &cli.layout_name;
+
+    let keycode_labels_file =
+        File::open("C:\\Users\\Stephan\\Entwicklung\\qmk-layout-helper\\data\\keys.json").unwrap();
+    let reader = BufReader::new(keycode_labels_file);
+    let keycode_label_map: HashMap<String, KeycodeInfo> = serde_json::from_reader(reader).unwrap();
 
     let keyboard_info =
         KeyboardInfo::new(&keyboard_config, &layout_name).expect("Failed to read keyboard layout.");
@@ -127,6 +158,11 @@ fn main() -> Result<(), eframe::Error> {
     eframe::run_native(
         "QMK Layout Helper",
         options,
-        Box::new(|_cc| Ok(Box::<Overlay>::new(Overlay::new(keyboard)))),
+        Box::new(|_cc| {
+            Ok(Box::<Overlay>::new(Overlay::new(
+                keyboard,
+                keycode_label_map,
+            )))
+        }),
     )
 }
