@@ -1,15 +1,14 @@
 use std::fmt::Debug;
-use std::{cmp::min, ffi::c_double};
 
-use crate::egui::ViewportCommand;
-use eframe::egui::{self, debug_text::print, TextBuffer};
+// use crate::egui::ViewportCommand;
+use eframe::egui::Galley;
+use eframe::egui::{self};
 use keyboard_layout::KeyboardInfo;
 mod keyboard;
 mod keyboard_layout;
 use clap::Parser;
 use keyboard::Keyboard;
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::BufReader;
@@ -17,11 +16,11 @@ use std::path::PathBuf;
 
 struct Overlay {
     keyboard: Keyboard,
-    keycode_label_map: HashMap<String, KeycodeInfo>,
+    keycode_label_map: HashMap<String, KeycodeLabel>,
 }
 
 impl Overlay {
-    fn new(keyboard: Keyboard, keycode_label_map: HashMap<String, KeycodeInfo>) -> Self {
+    fn new(keyboard: Keyboard, keycode_label_map: HashMap<String, KeycodeLabel>) -> Self {
         Self {
             keyboard,
             keycode_label_map,
@@ -33,6 +32,47 @@ impl Overlay {
         let width_ratio = available_width / layout_width;
         let height_ratio = available_height / layout_height;
         width_ratio.min(height_ratio)
+    }
+
+    fn generate_key_label_galley(
+        &self,
+        ui: &egui::Ui,
+        keycode_label: KeycodeLabel,
+        rect: egui::Rect,
+        font: egui::FontId,
+    ) -> Option<std::sync::Arc<Galley>> {
+        let create_galley = |text: &str| {
+            ui.painter()
+                .layout_no_wrap(text.to_string(), font.clone(), egui::Color32::WHITE)
+        };
+        let galley_fits =
+            |galley: &std::sync::Arc<Galley>| galley.rect.width() <= rect.width() * 0.8;
+
+        let full_galley = create_galley(&keycode_label.name);
+        if galley_fits(&full_galley) {
+            return Some(full_galley);
+        }
+
+        let mut truncated = if !keycode_label.short_name.is_empty() {
+            let short_galley = create_galley(&keycode_label.short_name);
+            if galley_fits(&short_galley) {
+                return Some(short_galley);
+            }
+            keycode_label.short_name
+        } else {
+            keycode_label.name
+        };
+
+        while truncated.len() > 1 {
+            truncated.pop();
+            let truncated_with_ellipsis = format!("{}...", truncated);
+            let truncated_galley = create_galley(&truncated_with_ellipsis);
+            if galley_fits(&truncated_galley) {
+                return Some(truncated_galley);
+            }
+        }
+
+        None
     }
 }
 
@@ -58,60 +98,34 @@ impl eframe::App for Overlay {
                     egui::vec2(key.w * unit_size, key.h * unit_size),
                 )
                 .shrink(0.05 * unit_size);
+
                 ui.painter().rect(
                     rect,
                     0.12 * unit_size,
-                    egui::Color32::from_rgba_unmultiplied(150, 150, 150, 170),
+                    egui::Color32::from_rgba_unmultiplied(150, 150, 150, 225),
                     egui::Stroke::NONE,
                 );
 
-                let font = egui::FontId::proportional(0.25 * unit_size);
+                let font = egui::FontId::proportional(0.35 * unit_size);
+
                 let keycode_str =
                     self.keyboard.matrix[0][key.row as usize][key.col as usize].as_ref();
-                let text = self
-                    .keycode_label_map
-                    .get(keycode_str)
-                    .map(|info| info.name.clone())
-                    .unwrap_or(keycode_str.to_string());
+                let keycode_label = self.keycode_label_map.get(keycode_str).unwrap();
 
-                let galley =
+                if let Some(label_galley) =
+                    self.generate_key_label_galley(ui, keycode_label.clone(), rect, font)
+                {
+                    let label_pos = rect.center() - label_galley.rect.center().to_vec2();
                     ui.painter()
-                        .layout_no_wrap(text.clone(), font.clone(), egui::Color32::WHITE);
-
-                let truncated_text = if galley.rect.width() > rect.width() {
-                    // TODO: Later this should be replaced with the short key code display name
-                    let mut truncated = text;
-                    while truncated.len() > 1 {
-                        truncated.pop();
-                        let temp_galley = ui.painter().layout_no_wrap(
-                            format!("{}...", truncated),
-                            font.clone(),
-                            egui::Color32::WHITE,
-                        );
-                        if temp_galley.rect.width() <= rect.width() {
-                            break;
-                        }
-                    }
-                    format!("{}...", truncated)
-                } else {
-                    text
-                };
-
-                let final_galley =
-                    ui.painter()
-                        .layout_no_wrap(truncated_text, font, egui::Color32::WHITE);
-
-                let text_pos = rect.center() - final_galley.rect.center().to_vec2();
-
-                ui.painter()
-                    .galley(text_pos, final_galley, egui::Color32::WHITE);
+                        .galley(label_pos, label_galley, egui::Color32::WHITE);
+                }
             }
         });
     }
 }
 
-#[derive(Debug, Deserialize, Serialize)]
-struct KeycodeInfo {
+#[derive(Debug, Clone, Deserialize, Serialize)]
+struct KeycodeLabel {
     name: String,
 
     #[serde(default = "empty_string")]
@@ -139,18 +153,17 @@ fn main() -> Result<(), eframe::Error> {
     let keycode_labels_file =
         File::open("C:\\Users\\Stephan\\Entwicklung\\qmk-layout-helper\\data\\keys.json").unwrap();
     let reader = BufReader::new(keycode_labels_file);
-    let keycode_label_map: HashMap<String, KeycodeInfo> = serde_json::from_reader(reader).unwrap();
+    let keycode_label_map: HashMap<String, KeycodeLabel> = serde_json::from_reader(reader).unwrap();
 
     let keyboard_info =
         KeyboardInfo::new(&keyboard_config, &layout_name).expect("Failed to read keyboard layout.");
-    let keyboard = Keyboard::new(keyboard_info.clone());
+    let keyboard = Keyboard::new(keyboard_info);
 
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
             .with_inner_size([700.0, 240.0])
             // .with_decorations(false)
             // .with_taskbar(false)
-            // .with_mouse_passthrough(true)
             .with_transparent(true)
             .with_always_on_top(),
         ..Default::default()

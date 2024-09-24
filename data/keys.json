@@ -193,14 +193,15 @@
     },
     "KC_PRINT_SCREEN": {
         "name": "Print Screen",
-        "short_name": "Print"
+        "short_name": "PrtSc"
     },
     "KC_SCROLL_LOCK": {
         "name": "Scroll Lock",
-        "short_name": "Scroll"
+        "short_name": "ScrLk"
     },
     "KC_PAUSE": {
-        "name": "Pause"
+        "name": "Pause",
+        "short_name": "Paus"
     },
     "KC_TAB": {
         "name": "Tab"
@@ -232,13 +233,15 @@
     },
     "KC_NUM_LOCK": {
         "name": "Num\nLock",
-        "short_name": "N.Lck"
+        "short_name": "NumLk"
     },
     "KC_CAPS_LOCK": {
-        "name": "Caps Lock"
+        "name": "Caps Lock",
+        "short_name": "Caps"
     },
     "KC_ENTER": {
-        "name": "Enter"
+        "name": "Enter",
+        "short_name": "Ent"
     },
     "KC_KP_1": {
         "name": "1"
@@ -298,11 +301,12 @@
         "short_name": "RShft"
     },
     "KC_LEFT_CTRL": {
-        "name": "Left Ctrl"
+        "name": "Left Ctrl",
+        "short_name": "LCtrl"
     },
     "KC_RIGHT_CTRL": {
         "name": "Right Ctrl",
-        "short_name": "RCtl"
+        "short_name": "RCtrl"
     },
     "KC_LEFT_GUI": {
         "name": "Left Win",
@@ -321,11 +325,11 @@
         "short_name": "RAlt"
     },
     "KC_SPACE": {
-        "name": "Space"
+        "name": "Space",
+        "short_name": "Spc"
     },
     "KC_APPLICATION": {
-        "name": "Menu",
-        "short_name": "RApp"
+        "name": "Menu"
     },
     "KC_LEFT": {
         "name": "Left",
@@ -412,25 +416,31 @@
         "name": "Play"
     },
     "KC_MEDIA_STOP": {
-        "name": "Media Stop"
+        "name": "Media Stop",
+        "short_name": "Stop"
     },
     "KC_MEDIA_PREV_TRACK": {
-        "name": "Previous"
+        "name": "Previous",
+        "short_name": "Prev"
     },
     "KC_MEDIA_NEXT_TRACK": {
         "name": "Next"
     },
     "KC_MEDIA_REWIND": {
-        "name": "Rewind"
+        "name": "Rewind",
+        "short_name": "Rwd"
     },
     "KC_MEDIA_FAST_FORWARD": {
-        "name": "Fast Forward"
+        "name": "Fast Forward",
+        "short_name": "FF"
     },
     "KC_MEDIA_SELECT": {
-        "name": "Select"
+        "name": "Select",
+        "short_name": "Sel"
     },
     "KC_MEDIA_EJECT": {
-        "name": "Eject"
+        "name": "Eject",
+        "short_name": "Ejct"
     },
     "S(KC_GRV)": {
         "name": "~"
