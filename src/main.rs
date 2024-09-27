@@ -1,30 +1,20 @@
-use std::fmt::Debug;
-
 // use crate::egui::ViewportCommand;
 use eframe::egui::Galley;
 use eframe::egui::{self};
-use keyboard_layout::KeyboardInfo;
 mod keyboard;
 mod keyboard_layout;
+mod keycode_label;
 use clap::Parser;
 use keyboard::Keyboard;
-use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
-use std::fs::File;
-use std::io::BufReader;
 use std::path::PathBuf;
 
 struct Overlay {
     keyboard: Keyboard,
-    keycode_label_map: HashMap<String, KeycodeLabel>,
 }
 
 impl Overlay {
-    fn new(keyboard: Keyboard, keycode_label_map: HashMap<String, KeycodeLabel>) -> Self {
-        Self {
-            keyboard,
-            keycode_label_map,
-        }
+    fn new(keyboard: Keyboard) -> Self {
+        Self { keyboard }
     }
 
     fn calculate_unit_size(&self, available_width: f32, available_height: f32) -> f32 {
@@ -37,7 +27,7 @@ impl Overlay {
     fn generate_key_label_galley(
         &self,
         ui: &egui::Ui,
-        keycode_label: KeycodeLabel,
+        keycode_label: keycode_label::KeycodeLabel,
         rect: egui::Rect,
         font: egui::FontId,
     ) -> Option<std::sync::Arc<Galley>> {
@@ -48,19 +38,22 @@ impl Overlay {
         let galley_fits =
             |galley: &std::sync::Arc<Galley>| galley.rect.width() <= rect.width() * 0.8;
 
-        let full_galley = create_galley(&keycode_label.name);
+        let long_label = keycode_label.long.unwrap_or_default();
+
+        let full_galley = create_galley(long_label);
         if galley_fits(&full_galley) {
             return Some(full_galley);
         }
 
-        let mut truncated = if !keycode_label.short_name.is_empty() {
-            let short_galley = create_galley(&keycode_label.short_name);
+        let mut truncated = if keycode_label.short.is_some() {
+            let short_label = keycode_label.short.unwrap_or_default();
+            let short_galley = create_galley(short_label);
             if galley_fits(&short_galley) {
                 return Some(short_galley);
             }
-            keycode_label.short_name
+            short_label.to_string()
         } else {
-            keycode_label.name
+            long_label.to_string()
         };
 
         while truncated.len() > 1 {
@@ -108,12 +101,11 @@ impl eframe::App for Overlay {
 
                 let font = egui::FontId::proportional(0.35 * unit_size);
 
-                let keycode_str =
-                    self.keyboard.matrix[0][key.row as usize][key.col as usize].as_ref();
-                let keycode_label = self.keycode_label_map.get(keycode_str).unwrap();
+                let keycode = self.keyboard.matrix[0][key.row as usize][key.col as usize];
+                let keycode_label = keycode_label::get_keycode_label(keycode);
 
                 if let Some(label_galley) =
-                    self.generate_key_label_galley(ui, keycode_label.clone(), rect, font)
+                    self.generate_key_label_galley(ui, keycode_label, rect, font)
                 {
                     let label_pos = rect.center() - label_galley.rect.center().to_vec2();
                     ui.painter()
@@ -122,18 +114,6 @@ impl eframe::App for Overlay {
             }
         });
     }
-}
-
-#[derive(Debug, Clone, Deserialize, Serialize)]
-struct KeycodeLabel {
-    name: String,
-
-    #[serde(default = "empty_string")]
-    short_name: String,
-}
-
-fn empty_string() -> String {
-    "".to_string()
 }
 
 #[derive(Parser)]
@@ -150,13 +130,8 @@ fn main() -> Result<(), eframe::Error> {
     let keyboard_config = cli.keyboard_config.to_str().expect("Invalid path");
     let layout_name = &cli.layout_name;
 
-    let keycode_labels_file =
-        File::open("C:\\Users\\Stephan\\Entwicklung\\qmk-layout-helper\\data\\keys.json").unwrap();
-    let reader = BufReader::new(keycode_labels_file);
-    let keycode_label_map: HashMap<String, KeycodeLabel> = serde_json::from_reader(reader).unwrap();
-
-    let keyboard_info =
-        KeyboardInfo::new(&keyboard_config, &layout_name).expect("Failed to read keyboard layout.");
+    let keyboard_info = keyboard_layout::KeyboardInfo::new(&keyboard_config, &layout_name)
+        .expect("Failed to read keyboard layout.");
     let keyboard = Keyboard::new(keyboard_info);
 
     let options = eframe::NativeOptions {
@@ -171,11 +146,6 @@ fn main() -> Result<(), eframe::Error> {
     eframe::run_native(
         "QMK Layout Helper",
         options,
-        Box::new(|_cc| {
-            Ok(Box::<Overlay>::new(Overlay::new(
-                keyboard,
-                keycode_label_map,
-            )))
-        }),
+        Box::new(|_cc| Ok(Box::<Overlay>::new(Overlay::new(keyboard)))),
     )
 }

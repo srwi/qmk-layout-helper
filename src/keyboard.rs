@@ -3,7 +3,6 @@ use qmk_via_api::api;
 use qmk_via_api::keycodes::Keycode;
 
 pub struct Keyboard {
-    pub api: api::KeyboardApi,
     pub keyboard_info: KeyboardInfo,
     pub matrix: Vec<Vec<Vec<Keycode>>>,
 }
@@ -18,7 +17,6 @@ impl Keyboard {
             Self::get_keycodes_from_device(&api, layers, keyboard_info.rows, keyboard_info.cols);
 
         Keyboard {
-            api,
             keyboard_info,
             matrix,
         }
