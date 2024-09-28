@@ -31,35 +31,35 @@ impl Overlay {
         rect: egui::Rect,
         font: egui::FontId,
     ) -> Option<std::sync::Arc<Galley>> {
-        let create_galley = |text: &str| {
+        let create_galley = |text: String| {
             ui.painter()
-                .layout_no_wrap(text.to_string(), font.clone(), egui::Color32::WHITE)
+                .layout_no_wrap(text, font.clone(), egui::Color32::WHITE)
         };
         let galley_fits =
-            |galley: &std::sync::Arc<Galley>| galley.rect.width() <= rect.width() * 0.8;
+            |galley: &std::sync::Arc<Galley>| galley.rect.width() <= rect.width() * 0.85;
 
         let long_label = keycode_label.long.unwrap_or_default();
 
-        let full_galley = create_galley(long_label);
+        let full_galley = create_galley(long_label.clone());
         if galley_fits(&full_galley) {
             return Some(full_galley);
         }
 
         let mut truncated = if keycode_label.short.is_some() {
             let short_label = keycode_label.short.unwrap_or_default();
-            let short_galley = create_galley(short_label);
+            let short_galley = create_galley(short_label.clone());
             if galley_fits(&short_galley) {
                 return Some(short_galley);
             }
-            short_label.to_string()
+            short_label
         } else {
-            long_label.to_string()
+            long_label
         };
 
         while truncated.len() > 1 {
             truncated.pop();
             let truncated_with_ellipsis = format!("{}...", truncated);
-            let truncated_galley = create_galley(&truncated_with_ellipsis);
+            let truncated_galley = create_galley(truncated_with_ellipsis);
             if galley_fits(&truncated_galley) {
                 return Some(truncated_galley);
             }
@@ -99,7 +99,7 @@ impl eframe::App for Overlay {
                     egui::Stroke::NONE,
                 );
 
-                let font = egui::FontId::proportional(0.35 * unit_size);
+                let font = egui::FontId::proportional(0.3 * unit_size);
 
                 let keycode = self.keyboard.matrix[0][key.row as usize][key.col as usize];
                 let keycode_label = keycode_label::get_keycode_label(keycode);
