@@ -1,4 +1,4 @@
-// use crate::egui::ViewportCommand;
+use crate::egui::ViewportCommand;
 use eframe::egui::Galley;
 use eframe::egui::{self};
 mod keyboard;
@@ -146,12 +146,45 @@ impl eframe::App for Overlay {
     }
 }
 
+fn parse_size(s: &str) -> Result<(u32, u32), String> {
+    let parts: Vec<&str> = s.split(',').collect();
+    if parts.len() != 2 {
+        return Err("Size must be in the format 'width,height'".to_string());
+    }
+    let width: u32 = parts[0].parse().map_err(|_| "Invalid width")?;
+    let height: u32 = parts[1].parse().map_err(|_| "Invalid height")?;
+    Ok((width, height))
+}
+
 #[derive(Parser)]
+#[command(author, version, about, long_about = None)]
 struct Cli {
     keyboard_config: PathBuf,
 
     #[arg(short = 'l', long = "layout", default_value = "LAYOUT")]
     layout_name: String,
+
+    #[arg(long, value_parser = parse_size, default_value = "700,240")]
+    size: (u32, u32),
+
+    #[arg(long, value_enum, default_value = "bottom-right")]
+    position: WindowPosition,
+
+    #[arg(long, value_parser = clap::value_parser!(u64).range(100..), default_value = "5000")]
+    timeout: u64,
+
+    #[arg(long, default_value = "10")]
+    margin: u32,
+}
+
+#[derive(clap::ValueEnum, Clone)]
+enum WindowPosition {
+    TopLeft,
+    TopRight,
+    BottomLeft,
+    BottomRight,
+    Bottom,
+    Top,
 }
 
 fn main() -> Result<(), eframe::Error> {
@@ -166,9 +199,11 @@ fn main() -> Result<(), eframe::Error> {
 
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
-            .with_inner_size([700.0, 240.0])
-            // .with_decorations(false)
-            // .with_taskbar(false)
+            .with_inner_size([cli.size.0 as f32, cli.size.1 as f32])
+            .with_position(calculate_window_pos(&cli.position, &cli.size, cli.margin))
+            .with_decorations(false)
+            .with_taskbar(false)
+            //.with_window_type(egui::X11WindowType::Notification)  // TODO: possible fix for X11 always on top
             .with_transparent(true)
             .with_always_on_top(),
         ..Default::default()
@@ -178,4 +213,39 @@ fn main() -> Result<(), eframe::Error> {
         options,
         Box::new(|_cc| Ok(Box::<Overlay>::new(Overlay::new(keyboard)))),
     )
+}
+
+fn get_primary_monitor_info() -> (winit::dpi::LogicalSize<f64>, f64) {
+    let event_loop = winit::event_loop::EventLoop::new(); // TODO: creating an event loop here causes egui to not update anymore
+    let primary_monitor = event_loop
+        .primary_monitor()
+        .expect("No primary monitor found");
+    let physical_size = primary_monitor.size();
+    let scale_factor = primary_monitor.scale_factor();
+    let logical_size = physical_size.to_logical(scale_factor);
+    (logical_size, scale_factor)
+}
+
+fn calculate_window_pos(position: &WindowPosition, size: &(u32, u32), margin: u32) -> egui::Pos2 {
+    let (screen_size, scale_factor) = get_primary_monitor_info();
+
+    let screen_width = screen_size.width as f32;
+    let screen_height = screen_size.height as f32;
+    let (width, height) = (size.0 as f32, size.1 as f32);
+    let margin = margin as f32 / scale_factor as f32;
+
+    match position {
+        WindowPosition::TopLeft => egui::Pos2::new(margin, margin),
+        WindowPosition::TopRight => egui::Pos2::new(screen_width - width - margin, margin),
+        WindowPosition::BottomLeft => egui::Pos2::new(margin, screen_height - height - margin),
+        WindowPosition::BottomRight => egui::Pos2::new(
+            screen_width - width - margin,
+            screen_height - height - margin,
+        ),
+        WindowPosition::Bottom => egui::Pos2::new(
+            (screen_width - width) / 2.0,
+            screen_height - height - margin,
+        ),
+        WindowPosition::Top => egui::Pos2::new((screen_width - width) / 2.0, margin),
+    }
 }
