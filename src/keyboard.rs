@@ -1,9 +1,10 @@
 use crate::keyboard_layout::KeyboardInfo;
-use qmk_via_api::api;
+use qmk_via_api::api::{self, KeyboardApi};
 
 pub struct Keyboard {
     pub keyboard_info: KeyboardInfo,
     pub matrix: Vec<Vec<Vec<u16>>>,
+    pub api: KeyboardApi,
 }
 
 impl Keyboard {
@@ -18,6 +19,7 @@ impl Keyboard {
         Keyboard {
             keyboard_info,
             matrix,
+            api,
         }
     }
 
@@ -28,14 +30,17 @@ impl Keyboard {
         cols: usize,
     ) -> Vec<Vec<Vec<u16>>> {
         let mut keycodes = vec![vec![vec![0; cols]; rows]; layers];
+        let matrix_info = api::MatrixInfo {
+            rows: rows as u8,
+            cols: cols as u8,
+        };
 
-        // TODO: Replace with api::read_raw_matrix
         for layer in 0..layers {
-            for row in 0..rows {
-                for col in 0..cols {
-                    keycodes[layer][row][col] = api
-                        .get_key(layer as u8, row as u8, col as u8)
-                        .unwrap_or_default()
+            if let Some(raw_matrix) = api.read_raw_matrix(matrix_info, layer as u8) {
+                for (i, keycode) in raw_matrix.iter().enumerate() {
+                    let row = i / cols;
+                    let col = i % cols;
+                    keycodes[layer][row][col] = *keycode;
                 }
             }
         }
