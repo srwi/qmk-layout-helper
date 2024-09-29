@@ -1,10 +1,9 @@
 use crate::keyboard_layout::KeyboardInfo;
-use qmk_via_api::api::{self, KeyboardApi};
+use qmk_via_api::api::{self};
 
 pub struct Keyboard {
     pub keyboard_info: KeyboardInfo,
     pub matrix: Vec<Vec<Vec<u16>>>,
-    pub api: KeyboardApi,
 }
 
 impl Keyboard {
@@ -19,7 +18,6 @@ impl Keyboard {
         Keyboard {
             keyboard_info,
             matrix,
-            api,
         }
     }
 

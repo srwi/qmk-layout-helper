@@ -76,7 +76,7 @@ fn get_basic_keycode_label(keycode_bytes: u16) -> Option<KeycodeLabel> {
             short: None,
         }),
         Keycode::KC_TRANSPARENT => Some(KeycodeLabel {
-            long: Some("▽".to_string()),
+            long: Some("🔽".to_string()),
             short: None,
         }),
         Keycode::KC_A => Some(KeycodeLabel {
@@ -380,20 +380,20 @@ fn get_basic_keycode_label(keycode_bytes: u16) -> Option<KeycodeLabel> {
             short: Some("PgDn".to_string()),
         }),
         Keycode::KC_RIGHT => Some(KeycodeLabel {
-            long: Some("Right".to_string()),
-            short: Some("→".to_string()),
+            long: Some("➡".to_string()),
+            short: None,
         }),
         Keycode::KC_LEFT => Some(KeycodeLabel {
-            long: Some("Left".to_string()),
-            short: Some("←".to_string()),
+            long: Some("⬅".to_string()),
+            short: None,
         }),
         Keycode::KC_DOWN => Some(KeycodeLabel {
-            long: Some("Down".to_string()),
-            short: Some("↓".to_string()),
+            long: Some("⬇".to_string()),
+            short: None,
         }),
         Keycode::KC_UP => Some(KeycodeLabel {
-            long: Some("Up".to_string()),
-            short: Some("↑".to_string()),
+            long: Some("⬆".to_string()),
+            short: None,
         }),
         Keycode::KC_NUM_LOCK => Some(KeycodeLabel {
             long: Some("Num\nLock".to_string()),
@@ -577,11 +577,11 @@ fn get_basic_keycode_label(keycode_bytes: u16) -> Option<KeycodeLabel> {
         }),
         Keycode::KC_KB_VOLUME_UP => Some(KeycodeLabel {
             long: Some("Vol +".to_string()),
-            short: None,
+            short: Some("Vol+".to_string()),
         }),
         Keycode::KC_KB_VOLUME_DOWN => Some(KeycodeLabel {
             long: Some("Vol -".to_string()),
-            short: None,
+            short: Some("Vol-".to_string()),
         }),
         Keycode::KC_LOCKING_CAPS_LOCK => Some(KeycodeLabel {
             long: Some("Locking Caps Lock".to_string()),
@@ -608,19 +608,19 @@ fn get_basic_keycode_label(keycode_bytes: u16) -> Option<KeycodeLabel> {
             short: None,
         }),
         Keycode::KC_INTERNATIONAL_2 => Some(KeycodeLabel {
-            long: Some("かな".to_string()),
+            long: Some("Int2".to_string()),
             short: None,
         }),
         Keycode::KC_INTERNATIONAL_3 => Some(KeycodeLabel {
-            long: Some("¥".to_string()),
+            long: Some("Int3".to_string()),
             short: None,
         }),
         Keycode::KC_INTERNATIONAL_4 => Some(KeycodeLabel {
-            long: Some("変換".to_string()),
+            long: Some("Int4".to_string()),
             short: None,
         }),
         Keycode::KC_INTERNATIONAL_5 => Some(KeycodeLabel {
-            long: Some("無変換".to_string()),
+            long: Some("Int5".to_string()),
             short: None,
         }),
         Keycode::KC_INTERNATIONAL_6 => Some(KeycodeLabel {
@@ -640,11 +640,11 @@ fn get_basic_keycode_label(keycode_bytes: u16) -> Option<KeycodeLabel> {
             short: None,
         }),
         Keycode::KC_LANGUAGE_1 => Some(KeycodeLabel {
-            long: Some("한영".to_string()),
+            long: Some("Lang1".to_string()),
             short: None,
         }),
         Keycode::KC_LANGUAGE_2 => Some(KeycodeLabel {
-            long: Some("漢字".to_string()),
+            long: Some("Lang2".to_string()),
             short: None,
         }),
         Keycode::KC_LANGUAGE_3 => Some(KeycodeLabel {
@@ -2201,7 +2201,7 @@ fn get_basic_keycode_label(keycode_bytes: u16) -> Option<KeycodeLabel> {
         }),
         Keycode::QK_BACKLIGHT_TOGGLE => Some(KeycodeLabel {
             long: Some("BL Toggle".to_string()),
-            short: None,
+            short: Some("BLTog".to_string()),
         }),
         Keycode::QK_BACKLIGHT_DOWN => Some(KeycodeLabel {
             long: Some("BL -".to_string()),
@@ -2229,7 +2229,7 @@ fn get_basic_keycode_label(keycode_bytes: u16) -> Option<KeycodeLabel> {
         }),
         Keycode::QK_LED_MATRIX_TOGGLE => Some(KeycodeLabel {
             long: Some("RGB Toggle".to_string()),
-            short: None,
+            short: Some("RGBTog".to_string()),
         }),
         Keycode::QK_LED_MATRIX_MODE_NEXT => Some(KeycodeLabel {
             long: Some("RGB Mode +".to_string()),

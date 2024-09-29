@@ -7,14 +7,38 @@ mod keycode_label;
 use clap::Parser;
 use keyboard::Keyboard;
 use std::path::PathBuf;
+use std::sync::{Arc, Mutex};
+use std::thread;
 
 struct Overlay {
     keyboard: Keyboard,
+    current_layer: Arc<Mutex<u8>>,
 }
 
 impl Overlay {
     fn new(keyboard: Keyboard) -> Self {
-        Self { keyboard }
+        let current_layer = Arc::new(Mutex::new(0));
+        let api = qmk_via_api::api::KeyboardApi::new(
+            keyboard.keyboard_info.vid,
+            keyboard.keyboard_info.pid,
+            0xff60,
+        );
+        let layer_clone = Arc::clone(&current_layer);
+
+        thread::spawn(move || loop {
+            if let Some(response) = api.hid_read() {
+                if response[0] == 0x01 {
+                    let new_layer = response[1];
+                    let mut layer = layer_clone.lock().unwrap();
+                    *layer = new_layer;
+                }
+            }
+        });
+
+        Self {
+            keyboard,
+            current_layer,
+        }
     }
 
     fn calculate_unit_size(&self, available_width: f32, available_height: f32) -> f32 {
@@ -82,6 +106,8 @@ impl eframe::App for Overlay {
             ..Default::default()
         };
         egui::CentralPanel::default().frame(frame).show(ctx, |ui| {
+            let layer = *self.current_layer.lock().unwrap();
+
             let available_rect = ui.available_size();
             let unit_size = self.calculate_unit_size(available_rect.x, available_rect.y);
 
@@ -101,7 +127,8 @@ impl eframe::App for Overlay {
 
                 let font = egui::FontId::proportional(0.3 * unit_size);
 
-                let keycode = self.keyboard.matrix[0][key.row as usize][key.col as usize];
+                let keycode =
+                    self.keyboard.matrix[layer as usize][key.row as usize][key.col as usize];
                 let keycode_label = keycode_label::get_keycode_label(keycode);
 
                 if let Some(label_galley) =
@@ -113,6 +140,9 @@ impl eframe::App for Overlay {
                 }
             }
         });
+
+        // TODO: make this on demand
+        ctx.request_repaint();
     }
 }
 
