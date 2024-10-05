@@ -16,13 +16,15 @@ struct Overlay {
 }
 
 impl Overlay {
-    fn new(keyboard: Keyboard) -> Self {
+    fn new(keyboard: Keyboard, ctx: egui::Context) -> Self {
         let current_layer = Arc::new(Mutex::new(0));
         let api = qmk_via_api::api::KeyboardApi::new(
             keyboard.keyboard_info.vid,
             keyboard.keyboard_info.pid,
             0xff60,
-        );
+        )
+        .expect("Failed to connect to device.");
+
         let layer_clone = Arc::clone(&current_layer);
 
         thread::spawn(move || loop {
@@ -31,6 +33,7 @@ impl Overlay {
                     let new_layer = response[1];
                     let mut layer = layer_clone.lock().unwrap();
                     *layer = new_layer;
+                    ctx.request_repaint();
                 }
             }
         });
@@ -140,9 +143,6 @@ impl eframe::App for Overlay {
                 }
             }
         });
-
-        // TODO: make this on demand
-        ctx.request_repaint();
     }
 }
 
@@ -211,7 +211,7 @@ fn main() -> Result<(), eframe::Error> {
     eframe::run_native(
         "QMK Layout Helper",
         options,
-        Box::new(|_cc| Ok(Box::<Overlay>::new(Overlay::new(keyboard)))),
+        Box::new(|cc| Ok(Box::new(Overlay::new(keyboard, cc.egui_ctx.clone())))),
     )
 }
 

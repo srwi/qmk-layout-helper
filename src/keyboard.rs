@@ -8,7 +8,8 @@ pub struct Keyboard {
 
 impl Keyboard {
     pub fn new(keyboard_info: KeyboardInfo) -> Self {
-        let api = api::KeyboardApi::new(keyboard_info.vid, keyboard_info.pid, 0xff60);
+        let api = api::KeyboardApi::new(keyboard_info.vid, keyboard_info.pid, 0xff60)
+            .expect("Failed to connect to device.");
 
         let layers = api.get_layer_count().unwrap() as usize;
 
