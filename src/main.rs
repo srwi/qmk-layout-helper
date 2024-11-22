@@ -14,15 +14,13 @@ use std::time::{Duration, Instant};
 struct Overlay {
     keyboard: Keyboard,
     current_layer: Arc<Mutex<u8>>,
-    visible: Arc<Mutex<bool>>,
-    last_layer_change: Arc<Mutex<Instant>>,
+    time_to_hide_overlay: Arc<Mutex<Option<Instant>>>,
 }
 
 impl Overlay {
     fn new(keyboard: Keyboard, ctx: egui::Context) -> Self {
         let current_layer = Arc::new(Mutex::new(0));
-        let visible = Arc::new(Mutex::new(false));
-        let last_layer_change = Arc::new(Mutex::new(Instant::now()));
+        let time_to_hide_overlay = Arc::new(Mutex::new(Some(Instant::now())));
         let api = qmk_via_api::api::KeyboardApi::new(
             keyboard.keyboard_info.vid,
             keyboard.keyboard_info.pid,
@@ -30,44 +28,23 @@ impl Overlay {
         )
         .expect("Failed to connect to device.");
 
-        let layer_clone = Arc::clone(&current_layer);
-        let visible_clone = Arc::clone(&visible);
-        let last_layer_change_clone = Arc::clone(&last_layer_change);
+        let current_layer_clone = Arc::clone(&current_layer);
+        let time_to_hide_overlay_clone = Arc::clone(&time_to_hide_overlay);
 
         thread::spawn(move || loop {
             if let Some(response) = api.hid_read() {
                 if response[0] == 0x01 {
                     let new_layer = response[1];
-                    {
-                        let mut layer = layer_clone.lock().unwrap();
-                        *layer = new_layer;
-                    }
-                    {
-                        let mut visible = visible_clone.lock().unwrap();
-                        *visible = true;
-                    }
-                    {
-                        let mut last_layer_change = last_layer_change_clone.lock().unwrap();
-                        *last_layer_change = Instant::now();
-                    }
-                    ctx.request_repaint();
+                    *current_layer_clone.lock().unwrap() = new_layer;
 
                     if new_layer == 0 {
-                        thread::spawn({
-                            let visible_clone = Arc::clone(&visible_clone);
-                            let layer_clone = Arc::clone(&layer_clone);
-                            let ctx = ctx.clone();
-                            move || {
-                                thread::sleep(Duration::from_secs(3));
-                                let layer = *layer_clone.lock().unwrap();
-                                if layer == 0 {
-                                    let mut visible = visible_clone.lock().unwrap();
-                                    *visible = false;
-                                    ctx.request_repaint();
-                                }
-                            }
-                        });
+                        *time_to_hide_overlay_clone.lock().unwrap() =
+                            Some(Instant::now() + Duration::from_secs(1));
+                    } else {
+                        *time_to_hide_overlay_clone.lock().unwrap() = None;
                     }
+
+                    ctx.request_repaint();
                 }
             }
         });
@@ -75,8 +52,7 @@ impl Overlay {
         Self {
             keyboard,
             current_layer,
-            visible,
-            last_layer_change,
+            time_to_hide_overlay,
         }
     }
 
@@ -138,9 +114,12 @@ impl eframe::App for Overlay {
     }
 
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
-        let visible = *self.visible.lock().unwrap();
-        if !visible {
-            return;
+        ctx.send_viewport_cmd(ViewportCommand::MousePassthrough(true));
+
+        if let Some(time_to_hide) = *self.time_to_hide_overlay.lock().unwrap() {
+            if Instant::now() > time_to_hide {
+                return;
+            }
         }
 
         let frame = egui::Frame {
@@ -182,6 +161,8 @@ impl eframe::App for Overlay {
                 }
             }
         });
+
+        ctx.request_repaint();
     }
 }
 
