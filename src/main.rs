@@ -9,15 +9,20 @@ use keyboard::Keyboard;
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 use std::thread;
+use std::time::{Duration, Instant};
 
 struct Overlay {
     keyboard: Keyboard,
     current_layer: Arc<Mutex<u8>>,
+    visible: Arc<Mutex<bool>>,
+    last_layer_change: Arc<Mutex<Instant>>,
 }
 
 impl Overlay {
     fn new(keyboard: Keyboard, ctx: egui::Context) -> Self {
         let current_layer = Arc::new(Mutex::new(0));
+        let visible = Arc::new(Mutex::new(false));
+        let last_layer_change = Arc::new(Mutex::new(Instant::now()));
         let api = qmk_via_api::api::KeyboardApi::new(
             keyboard.keyboard_info.vid,
             keyboard.keyboard_info.pid,
@@ -26,14 +31,43 @@ impl Overlay {
         .expect("Failed to connect to device.");
 
         let layer_clone = Arc::clone(&current_layer);
+        let visible_clone = Arc::clone(&visible);
+        let last_layer_change_clone = Arc::clone(&last_layer_change);
 
         thread::spawn(move || loop {
             if let Some(response) = api.hid_read() {
                 if response[0] == 0x01 {
                     let new_layer = response[1];
-                    let mut layer = layer_clone.lock().unwrap();
-                    *layer = new_layer;
+                    {
+                        let mut layer = layer_clone.lock().unwrap();
+                        *layer = new_layer;
+                    }
+                    {
+                        let mut visible = visible_clone.lock().unwrap();
+                        *visible = true;
+                    }
+                    {
+                        let mut last_layer_change = last_layer_change_clone.lock().unwrap();
+                        *last_layer_change = Instant::now();
+                    }
                     ctx.request_repaint();
+
+                    if new_layer == 0 {
+                        thread::spawn({
+                            let visible_clone = Arc::clone(&visible_clone);
+                            let layer_clone = Arc::clone(&layer_clone);
+                            let ctx = ctx.clone();
+                            move || {
+                                thread::sleep(Duration::from_secs(3));
+                                let layer = *layer_clone.lock().unwrap();
+                                if layer == 0 {
+                                    let mut visible = visible_clone.lock().unwrap();
+                                    *visible = false;
+                                    ctx.request_repaint();
+                                }
+                            }
+                        });
+                    }
                 }
             }
         });
@@ -41,6 +75,8 @@ impl Overlay {
         Self {
             keyboard,
             current_layer,
+            visible,
+            last_layer_change,
         }
     }
 
@@ -102,7 +138,10 @@ impl eframe::App for Overlay {
     }
 
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
-        // ctx.send_viewport_cmd(ViewportCommand::MousePassthrough(true));
+        let visible = *self.visible.lock().unwrap();
+        if !visible {
+            return;
+        }
 
         let frame = egui::Frame {
             fill: egui::Color32::TRANSPARENT,
@@ -200,7 +239,8 @@ fn main() -> Result<(), eframe::Error> {
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
             .with_inner_size([cli.size.0 as f32, cli.size.1 as f32])
-            .with_position(calculate_window_pos(&cli.position, &cli.size, cli.margin))
+            // .with_position(calculate_window_pos(&cli.position, &cli.size, cli.margin))
+            .with_position(egui::Pos2::new(0.0, 0.0))
             .with_decorations(false)
             .with_taskbar(false)
             //.with_window_type(egui::X11WindowType::Notification)  // TODO: possible fix for X11 always on top
@@ -215,37 +255,38 @@ fn main() -> Result<(), eframe::Error> {
     )
 }
 
-fn get_primary_monitor_info() -> (winit::dpi::LogicalSize<f64>, f64) {
-    let event_loop = winit::event_loop::EventLoop::new(); // TODO: creating an event loop here causes egui to not update anymore
-    let primary_monitor = event_loop
-        .primary_monitor()
-        .expect("No primary monitor found");
-    let physical_size = primary_monitor.size();
-    let scale_factor = primary_monitor.scale_factor();
-    let logical_size = physical_size.to_logical(scale_factor);
-    (logical_size, scale_factor)
-}
+// fn get_primary_monitor_info() -> (winit::dpi::LogicalSize<f64>, f64) {
+//     // TODO: window position should only be set when showing the overlay. Maybe it can be done inside the update function and therfore dont require the event loop here
+//     let event_loop = winit::event_loop::EventLoop::new(); // TODO: creating an event loop here causes egui to not update anymore
+//     let primary_monitor = event_loop
+//         .primary_monitor()
+//         .expect("No primary monitor found");
+//     let physical_size = primary_monitor.size();
+//     let scale_factor = primary_monitor.scale_factor();
+//     let logical_size = physical_size.to_logical(scale_factor);
+//     (logical_size, scale_factor)
+// }
 
-fn calculate_window_pos(position: &WindowPosition, size: &(u32, u32), margin: u32) -> egui::Pos2 {
-    let (screen_size, scale_factor) = get_primary_monitor_info();
+// fn calculate_window_pos(position: &WindowPosition, size: &(u32, u32), margin: u32) -> egui::Pos2 {
+//     let (screen_size, scale_factor) = get_primary_monitor_info();
 
-    let screen_width = screen_size.width as f32;
-    let screen_height = screen_size.height as f32;
-    let (width, height) = (size.0 as f32, size.1 as f32);
-    let margin = margin as f32 / scale_factor as f32;
+//     let screen_width = screen_size.width as f32;
+//     let screen_height = screen_size.height as f32;
+//     let (width, height) = (size.0 as f32, size.1 as f32);
+//     let margin = margin as f32 / scale_factor as f32;
 
-    match position {
-        WindowPosition::TopLeft => egui::Pos2::new(margin, margin),
-        WindowPosition::TopRight => egui::Pos2::new(screen_width - width - margin, margin),
-        WindowPosition::BottomLeft => egui::Pos2::new(margin, screen_height - height - margin),
-        WindowPosition::BottomRight => egui::Pos2::new(
-            screen_width - width - margin,
-            screen_height - height - margin,
-        ),
-        WindowPosition::Bottom => egui::Pos2::new(
-            (screen_width - width) / 2.0,
-            screen_height - height - margin,
-        ),
-        WindowPosition::Top => egui::Pos2::new((screen_width - width) / 2.0, margin),
-    }
-}
+//     match position {
+//         WindowPosition::TopLeft => egui::Pos2::new(margin, margin),
+//         WindowPosition::TopRight => egui::Pos2::new(screen_width - width - margin, margin),
+//         WindowPosition::BottomLeft => egui::Pos2::new(margin, screen_height - height - margin),
+//         WindowPosition::BottomRight => egui::Pos2::new(
+//             screen_width - width - margin,
+//             screen_height - height - margin,
+//         ),
+//         WindowPosition::Bottom => egui::Pos2::new(
+//             (screen_width - width) / 2.0,
+//             screen_height - height - margin,
+//         ),
+//         WindowPosition::Top => egui::Pos2::new((screen_width - width) / 2.0, margin),
+//     }
+// }
