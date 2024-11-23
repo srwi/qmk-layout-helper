@@ -1,24 +1,30 @@
-use crate::egui::ViewportCommand;
-use eframe::egui::Galley;
-use eframe::egui::{self};
-mod keyboard;
-mod keyboard_layout;
-mod keycode_label;
 use clap::Parser;
-use keyboard::Keyboard;
+use eframe::egui::{self, Align2, Window};
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::{Duration, Instant};
 
+mod keyboard;
+mod keyboard_layout;
+mod keycode_label;
+use keyboard::Keyboard;
+
 struct Overlay {
     keyboard: Keyboard,
     current_layer: Arc<Mutex<u8>>,
     time_to_hide_overlay: Arc<Mutex<Option<Instant>>>,
+    size: (u32, u32),
+    position: WindowPosition,
 }
 
 impl Overlay {
-    fn new(keyboard: Keyboard, ctx: egui::Context) -> Self {
+    fn new(
+        keyboard: Keyboard,
+        ctx: egui::Context,
+        size: (u32, u32),
+        position: WindowPosition,
+    ) -> Self {
         let current_layer = Arc::new(Mutex::new(0));
         let time_to_hide_overlay = Arc::new(Mutex::new(Some(Instant::now())));
         let api = qmk_via_api::api::KeyboardApi::new(
@@ -53,6 +59,8 @@ impl Overlay {
             keyboard,
             current_layer,
             time_to_hide_overlay,
+            size,
+            position,
         }
     }
 
@@ -69,13 +77,13 @@ impl Overlay {
         keycode_label: keycode_label::KeycodeLabel,
         rect: egui::Rect,
         font: egui::FontId,
-    ) -> Option<std::sync::Arc<Galley>> {
+    ) -> Option<std::sync::Arc<egui::Galley>> {
         let create_galley = |text: String| {
             ui.painter()
                 .layout_no_wrap(text, font.clone(), egui::Color32::WHITE)
         };
         let galley_fits =
-            |galley: &std::sync::Arc<Galley>| galley.rect.width() <= rect.width() * 0.85;
+            |galley: &std::sync::Arc<egui::Galley>| galley.rect.width() <= rect.width() * 0.85;
 
         let long_label = keycode_label.long.unwrap_or_default();
 
@@ -114,53 +122,68 @@ impl eframe::App for Overlay {
     }
 
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
-        ctx.send_viewport_cmd(ViewportCommand::MousePassthrough(true));
+        ctx.send_viewport_cmd(egui::ViewportCommand::MousePassthrough(true));
 
-        if let Some(time_to_hide) = *self.time_to_hide_overlay.lock().unwrap() {
-            if Instant::now() > time_to_hide {
-                return;
-            }
-        }
-
-        let frame = egui::Frame {
-            fill: egui::Color32::TRANSPARENT,
-            ..Default::default()
+        let mut window_open = match self.time_to_hide_overlay.lock().unwrap().as_ref() {
+            Some(time_to_hide) => Instant::now() < *time_to_hide,
+            None => true,
         };
-        egui::CentralPanel::default().frame(frame).show(ctx, |ui| {
-            let layer = *self.current_layer.lock().unwrap();
 
-            let available_rect = ui.available_size();
-            let unit_size = self.calculate_unit_size(available_rect.x, available_rect.y);
+        let anchor = match self.position {
+            WindowPosition::TopLeft => Align2::LEFT_TOP,
+            WindowPosition::TopRight => Align2::RIGHT_TOP,
+            WindowPosition::BottomLeft => Align2::LEFT_BOTTOM,
+            WindowPosition::BottomRight => Align2::RIGHT_BOTTOM,
+            WindowPosition::Bottom => Align2::CENTER_BOTTOM,
+            WindowPosition::Top => Align2::CENTER_TOP,
+        };
 
-            for key in &self.keyboard.keyboard_info.keys {
-                let rect = egui::Rect::from_min_size(
-                    egui::pos2(key.x * unit_size, key.y * unit_size),
-                    egui::vec2(key.w * unit_size, key.h * unit_size),
-                )
-                .shrink(0.05 * unit_size);
+        Window::new("QMK Layout Helper")
+            .open(&mut window_open)
+            .fixed_size(egui::vec2(self.size.0 as f32, self.size.1 as f32))
+            .anchor(anchor, [0.0, 0.0])
+            .frame(egui::Frame::none().fill(egui::Color32::TRANSPARENT))
+            .fade_out(true)
+            .title_bar(false)
+            .show(ctx, |ui| {
+                // Required as workaround for https://github.com/emilk/egui/issues/498
+                ui.set_width(ui.available_width());
+                ui.set_height(ui.available_height());
 
-                ui.painter().rect(
-                    rect,
-                    0.12 * unit_size,
-                    egui::Color32::from_rgba_unmultiplied(150, 150, 150, 225),
-                    egui::Stroke::NONE,
-                );
+                let layer = *self.current_layer.lock().unwrap();
 
-                let font = egui::FontId::proportional(0.3 * unit_size);
+                let available_rect = ui.available_size();
+                let unit_size = self.calculate_unit_size(available_rect.x, available_rect.y);
+                let window_pos = ui.min_rect().min;
+                for key in &self.keyboard.keyboard_info.keys {
+                    let rect = egui::Rect::from_min_size(
+                        egui::pos2(key.x * unit_size, key.y * unit_size) + window_pos.to_vec2(),
+                        egui::vec2(key.w * unit_size, key.h * unit_size),
+                    )
+                    .shrink(0.05 * unit_size);
 
-                let keycode =
-                    self.keyboard.matrix[layer as usize][key.row as usize][key.col as usize];
-                let keycode_label = keycode_label::get_keycode_label(keycode);
+                    ui.painter().rect(
+                        rect,
+                        0.12 * unit_size,
+                        egui::Color32::from_rgba_unmultiplied(150, 150, 150, 225),
+                        egui::Stroke::NONE,
+                    );
 
-                if let Some(label_galley) =
-                    self.generate_key_label_galley(ui, keycode_label, rect, font)
-                {
-                    let label_pos = rect.center() - label_galley.rect.center().to_vec2();
-                    ui.painter()
-                        .galley(label_pos, label_galley, egui::Color32::WHITE);
+                    let font = egui::FontId::proportional(0.3 * unit_size);
+
+                    let keycode =
+                        self.keyboard.matrix[layer as usize][key.row as usize][key.col as usize];
+                    let keycode_label = keycode_label::get_keycode_label(keycode);
+
+                    if let Some(label_galley) =
+                        self.generate_key_label_galley(ui, keycode_label, rect, font)
+                    {
+                        let label_pos = rect.center() - label_galley.rect.center().to_vec2();
+                        ui.painter()
+                            .galley(label_pos, label_galley, egui::Color32::WHITE);
+                    }
                 }
-            }
-        });
+            });
 
         ctx.request_repaint();
     }
@@ -219,13 +242,9 @@ fn main() -> Result<(), eframe::Error> {
 
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
-            // .with_inner_size([cli.size.0 as f32, cli.size.1 as f32])
-            // .with_position(calculate_window_pos(&cli.position, &cli.size, cli.margin))
-            // .with_position(egui::Pos2::new(0.0, 0.0))
             .with_decorations(false)
             .with_taskbar(false)
             .with_maximized(true)
-            //.with_window_type(egui::X11WindowType::Notification)  // TODO: possible fix for X11 always on top
             .with_transparent(true)
             .with_always_on_top(),
         ..Default::default()
@@ -233,42 +252,13 @@ fn main() -> Result<(), eframe::Error> {
     eframe::run_native(
         "QMK Layout Helper",
         options,
-        Box::new(|cc| Ok(Box::new(Overlay::new(keyboard, cc.egui_ctx.clone())))),
+        Box::new(move |cc| {
+            Ok(Box::new(Overlay::new(
+                keyboard,
+                cc.egui_ctx.clone(),
+                cli.size,
+                cli.position,
+            )))
+        }),
     )
-}
-
-fn get_primary_monitor_info() -> (winit::dpi::LogicalSize<f64>, f64) {
-    // TODO: window position should only be set when showing the overlay. Maybe it can be done inside the update function and therfore dont require the event loop here
-    let event_loop = winit::event_loop::EventLoop::new(); // TODO: creating an event loop here causes egui to not update anymore
-    let primary_monitor = event_loop
-        .primary_monitor()
-        .expect("No primary monitor found");
-    let physical_size = primary_monitor.size();
-    let scale_factor = primary_monitor.scale_factor();
-    let logical_size = physical_size.to_logical(scale_factor);
-    (logical_size, scale_factor)
-}
-
-fn calculate_window_pos(position: &WindowPosition, size: &(u32, u32), margin: u32) -> egui::Pos2 {
-    let (screen_size, scale_factor) = get_primary_monitor_info();
-
-    let screen_width = screen_size.width as f32;
-    let screen_height = screen_size.height as f32;
-    let (width, height) = (size.0 as f32, size.1 as f32);
-    let margin = margin as f32 / scale_factor as f32;
-
-    match position {
-        WindowPosition::TopLeft => egui::Pos2::new(margin, margin),
-        WindowPosition::TopRight => egui::Pos2::new(screen_width - width - margin, margin),
-        WindowPosition::BottomLeft => egui::Pos2::new(margin, screen_height - height - margin),
-        WindowPosition::BottomRight => egui::Pos2::new(
-            screen_width - width - margin,
-            screen_height - height - margin,
-        ),
-        WindowPosition::Bottom => egui::Pos2::new(
-            (screen_width - width) / 2.0,
-            screen_height - height - margin,
-        ),
-        WindowPosition::Top => egui::Pos2::new((screen_width - width) / 2.0, margin),
-    }
 }
