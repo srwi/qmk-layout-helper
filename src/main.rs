@@ -156,24 +156,25 @@ impl eframe::App for Overlay {
                 let unit_size = self.calculate_unit_size(available_rect.x, available_rect.y);
                 let window_pos = ui.min_rect().min;
                 for key in &self.keyboard.keyboard_info.keys {
+                    let keycode =
+                        self.keyboard.matrix[layer as usize][key.row as usize][key.col as usize];
+                    let keycode_label = keycode_label::get_keycode_label(keycode);
+
                     let rect = egui::Rect::from_min_size(
                         egui::pos2(key.x * unit_size, key.y * unit_size) + window_pos.to_vec2(),
                         egui::vec2(key.w * unit_size, key.h * unit_size),
                     )
                     .shrink(0.05 * unit_size);
 
+                    // TODO: The color should be based on the keycodes of the first layer
                     ui.painter().rect(
                         rect,
                         0.12 * unit_size,
-                        egui::Color32::from_rgba_unmultiplied(150, 150, 150, 225),
+                        keycode_label.color,
                         egui::Stroke::NONE,
                     );
 
                     let font = egui::FontId::proportional(0.3 * unit_size);
-
-                    let keycode =
-                        self.keyboard.matrix[layer as usize][key.row as usize][key.col as usize];
-                    let keycode_label = keycode_label::get_keycode_label(keycode);
 
                     if let Some(label_galley) =
                         self.generate_key_label_galley(ui, keycode_label, rect, font)
