@@ -30,7 +30,15 @@ impl Default for KeycodeLabel {
 pub fn get_keycode_label(bytes: u16) -> KeycodeLabel {
     get_basic_keycode_label(bytes)
         .or_else(|| get_layer_keycode_label(bytes))
-        .unwrap_or_else(KeycodeLabel::default)
+        .unwrap_or_else(|| get_hex_keycode_label(bytes))
+}
+
+fn get_hex_keycode_label(keycode_bytes: u16) -> KeycodeLabel {
+    KeycodeLabel {
+        long: Some(format!("0x{:04X}", keycode_bytes)),
+        short: None,
+        ..Default::default()
+    }
 }
 
 fn get_layer_keycode_label(keycode_bytes: u16) -> Option<KeycodeLabel> {
