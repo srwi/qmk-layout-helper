@@ -166,13 +166,10 @@ impl eframe::App for Overlay {
                     )
                     .shrink(0.05 * unit_size);
 
-                    // TODO: The color should be based on the keycodes of the first layer
-                    ui.painter().rect(
-                        rect,
-                        0.12 * unit_size,
-                        keycode_label.color,
-                        egui::Stroke::NONE,
-                    );
+                    let base_keycode = self.keyboard.matrix[0][key.row as usize][key.col as usize];
+                    let base_color = keycode_label::get_keycode_label(base_keycode).color;
+                    ui.painter()
+                        .rect(rect, 0.12 * unit_size, base_color, egui::Stroke::NONE);
 
                     let font = egui::FontId::proportional(0.3 * unit_size);
 
