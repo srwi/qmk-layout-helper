@@ -11,7 +11,7 @@ impl Keyboard {
         let api = api::KeyboardApi::new(keyboard_info.vid, keyboard_info.pid, 0xff60)
             .expect("Failed to connect to device.");
 
-        let layers = api.get_layer_count().unwrap() as usize;
+        let layers = api.get_layer_count().expect("Failed to get layer count") as usize;
 
         let matrix =
             Self::get_keycodes_from_device(&api, layers, keyboard_info.rows, keyboard_info.cols);
@@ -35,7 +35,7 @@ impl Keyboard {
         };
 
         for layer in 0..layers {
-            if let Some(raw_matrix) = api.read_raw_matrix(matrix_info, layer as u8) {
+            if let Ok(raw_matrix) = api.read_raw_matrix(matrix_info, layer as u8) {
                 for (i, keycode) in raw_matrix.iter().enumerate() {
                     let row = i / cols;
                     let col = i % cols;

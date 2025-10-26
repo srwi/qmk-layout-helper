@@ -8,8 +8,12 @@ const QK_DEF_LAYER: Range<u16> = 0x5240..0x5260;
 const QK_TOGGLE_LAYER: Range<u16> = 0x5260..0x5280;
 const QK_ONE_SHOT_LAYER: Range<u16> = 0x5280..0x52A0;
 const QK_LAYER_TAP_TOGGLE: Range<u16> = 0x52C0..0x52E0;
-const QK_KB: Range<u16> = 0x7E00..0x7E40;
+const QK_KB: Range<u16> = 0x7E00..0x7F00;
 const QK_MACRO: Range<u16> = 0x7700..0x7780;
+const QK_MOD_TAP: Range<u16> = 0x2000..0x4000;
+const QK_LAYER_TAP: Range<u16> = 0x4000..0x5000;
+const QK_LAYER_MOD: Range<u16> = 0x5000..0x5200;
+const QK_ONE_SHOT_MOD: Range<u16> = 0x52A0..0x52C0;
 
 pub struct KeycodeLabel {
     pub long: Option<String>,
@@ -30,6 +34,7 @@ impl Default for KeycodeLabel {
 pub fn get_keycode_label(bytes: u16) -> KeycodeLabel {
     get_basic_keycode_label(bytes)
         .or_else(|| get_layer_keycode_label(bytes))
+        .or_else(|| get_advanced_keycode_label(bytes))
         .unwrap_or_else(|| get_hex_keycode_label(bytes))
 }
 
@@ -39,6 +44,125 @@ fn get_hex_keycode_label(keycode_bytes: u16) -> KeycodeLabel {
         short: None,
         ..Default::default()
     }
+}
+
+fn mods_to_string(mods: u8) -> String {
+    let mut parts = Vec::new();
+
+    if mods & 0x01 != 0 {
+        parts.push("MOD_LCTL");
+    }
+    if mods & 0x02 != 0 {
+        parts.push("MOD_LSFT");
+    }
+    if mods & 0x04 != 0 {
+        parts.push("MOD_LALT");
+    }
+    if mods & 0x08 != 0 {
+        parts.push("MOD_LGUI");
+    }
+    if mods & 0x11 != 0 {
+        parts.push("MOD_RCTL");
+    }
+    if mods & 0x12 != 0 {
+        parts.push("MOD_RSFT");
+    }
+    if mods & 0x14 != 0 {
+        parts.push("MOD_RALT");
+    }
+    if mods & 0x18 != 0 {
+        parts.push("MOD_RGUI");
+    }
+
+    if parts.is_empty() {
+        "KC_NO".to_string()
+    } else {
+        parts.join(" | ")
+    }
+}
+
+fn get_advanced_keycode_label(keycode_bytes: u16) -> Option<KeycodeLabel> {
+    let label = if (keycode_bytes & 0xFF00) >= 0x0100 && (keycode_bytes & 0xFF00) < 0x2000 {
+        let base_keycode = keycode_bytes & 0x00FF;
+        let mods = ((keycode_bytes & 0x1F00) >> 8) as u8;
+
+        if let Some(base_label) = get_basic_keycode_label(base_keycode) {
+            let mod_str = mods_to_string(mods);
+            Some(format!(
+                "{}({})",
+                mod_str,
+                base_label.long.unwrap_or_default()
+            ))
+        } else {
+            None
+        }
+    } else if QK_MOD_TAP.contains(&keycode_bytes) {
+        let mods = ((keycode_bytes >> 8) & 0x1F) as u8;
+        let kc = keycode_bytes & 0xFF;
+        if let Some(base_label) = get_basic_keycode_label(kc) {
+            let mod_str = mods_to_string(mods);
+            Some(format!(
+                "MT({},{})",
+                mod_str,
+                base_label.long.unwrap_or_default()
+            ))
+        } else {
+            None
+        }
+    } else if QK_LAYER_TAP.contains(&keycode_bytes) {
+        let layer = (keycode_bytes >> 8) & 0x0F;
+        let kc = keycode_bytes & 0xFF;
+        if let Some(base_label) = get_basic_keycode_label(kc) {
+            Some(format!(
+                "LT({},{})",
+                layer,
+                base_label.long.unwrap_or_default()
+            ))
+        } else {
+            None
+        }
+    } else if QK_LAYER_MOD.contains(&keycode_bytes) {
+        let layer = (keycode_bytes >> 4) & 0x0F;
+        let mods = (keycode_bytes & 0x0F) as u8;
+        let mod_str = mods_to_string(mods);
+        Some(format!("LM({},{})", layer, mod_str))
+    } else if QK_TO.contains(&keycode_bytes) {
+        let layer = keycode_bytes - QK_TO.start;
+        Some(format!("TO({})", layer))
+    } else if QK_MOMENTARY.contains(&keycode_bytes) {
+        let layer = keycode_bytes - QK_MOMENTARY.start;
+        Some(format!("MO({})", layer))
+    } else if QK_DEF_LAYER.contains(&keycode_bytes) {
+        let layer = keycode_bytes - QK_DEF_LAYER.start;
+        Some(format!("DF({})", layer))
+    } else if QK_TOGGLE_LAYER.contains(&keycode_bytes) {
+        let layer = keycode_bytes - QK_TOGGLE_LAYER.start;
+        Some(format!("TG({})", layer))
+    } else if QK_ONE_SHOT_LAYER.contains(&keycode_bytes) {
+        let layer = keycode_bytes - QK_ONE_SHOT_LAYER.start;
+        Some(format!("OSL({})", layer))
+    } else if QK_ONE_SHOT_MOD.contains(&keycode_bytes) {
+        let mods = (keycode_bytes & 0xFF) as u8;
+        let mod_str = mods_to_string(mods);
+        Some(format!("OSM({})", mod_str))
+    } else if QK_LAYER_TAP_TOGGLE.contains(&keycode_bytes) {
+        let layer = keycode_bytes - QK_LAYER_TAP_TOGGLE.start;
+        Some(format!("TT({})", layer))
+    } else if QK_KB.contains(&keycode_bytes) {
+        let n = keycode_bytes - QK_KB.start;
+        Some(format!("CUSTOM({})", n))
+    } else if QK_MACRO.contains(&keycode_bytes) {
+        let n = keycode_bytes - QK_MACRO.start;
+        Some(format!("MACRO({})", n))
+    } else {
+        None
+    };
+
+    label.map(|l| KeycodeLabel {
+        long: Some(l),
+        short: None,
+        ..Default::default()
+    })
 }
 
 fn get_layer_keycode_label(keycode_bytes: u16) -> Option<KeycodeLabel> {

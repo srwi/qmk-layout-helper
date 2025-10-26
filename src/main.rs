@@ -38,7 +38,7 @@ impl Overlay {
         let time_to_hide_overlay_clone = Arc::clone(&time_to_hide_overlay);
 
         thread::spawn(move || loop {
-            if let Some(response) = api.hid_read() {
+            if let Ok(response) = api.hid_read() {
                 if response[0] == 0x01 {
                     let new_layer = response[1];
                     *current_layer_clone.lock().unwrap() = new_layer;
