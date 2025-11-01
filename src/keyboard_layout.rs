@@ -25,7 +25,7 @@ pub struct KeyboardInfo {
 
 impl KeyboardInfo {
     pub fn new(json_path: &str, layout_name: &str) -> Result<Self, Box<dyn std::error::Error>> {
-        let file = File::open(json_path)?;
+        let file = File::open(json_path).expect("Failed to open keyboard info JSON file.");
         let reader = BufReader::new(file);
         let json: Value = serde_json::from_reader(reader)?;
 
@@ -62,8 +62,18 @@ impl KeyboardInfo {
             });
         }
 
-        let rows = json["matrix_size"].get("rows").unwrap().as_i64().unwrap() as usize;
-        let cols = json["matrix_size"].get("cols").unwrap().as_i64().unwrap() as usize;
+        let rows = json["matrix_pins"]
+            .get("rows")
+            .unwrap()
+            .as_array()
+            .unwrap()
+            .len();
+        let cols = json["matrix_pins"]
+            .get("cols")
+            .unwrap()
+            .as_array()
+            .unwrap()
+            .len();
 
         let vid = Self::hex_to_u16(json["usb"].get("vid").unwrap().as_str().unwrap()).unwrap();
         let pid = Self::hex_to_u16(json["usb"].get("pid").unwrap().as_str().unwrap()).unwrap();

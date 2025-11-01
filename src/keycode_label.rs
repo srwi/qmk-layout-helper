@@ -155,11 +155,11 @@ fn get_advanced_keycode_label(keycode_bytes: u16) -> Option<KeycodeLabel> {
         let n = keycode_bytes - QK_MACRO.start;
         Some(format!("MACRO({})", n))
     } else {
-        None
+        return None;
     };
 
-    label.map(|l| KeycodeLabel {
-        long: Some(l),
+    Some(KeycodeLabel {
+        long: label,
         short: None,
         ..Default::default()
     })
