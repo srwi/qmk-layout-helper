@@ -39,6 +39,7 @@ fn main() -> Result<(), eframe::Error> {
                 keyboard,
                 cc.egui_ctx.clone(),
                 cli.size,
+                cli.margin,
                 cli.position,
             )))
         }),

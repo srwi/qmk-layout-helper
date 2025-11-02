@@ -13,6 +13,7 @@ pub struct Overlay {
     current_layer: Arc<Mutex<u8>>,
     time_to_hide_overlay: Arc<Mutex<Option<Instant>>>,
     size: (u32, u32),
+    margin: u32,
     position: WindowPosition,
 }
 
@@ -21,6 +22,7 @@ impl Overlay {
         keyboard: Keyboard,
         ctx: egui::Context,
         size: (u32, u32),
+        margin: u32,
         position: WindowPosition,
     ) -> Self {
         let current_layer = Arc::new(Mutex::new(0));
@@ -58,6 +60,7 @@ impl Overlay {
             current_layer,
             time_to_hide_overlay,
             size,
+            margin,
             position,
         }
     }
@@ -112,6 +115,32 @@ impl Overlay {
 
         None
     }
+
+    fn get_anchor_params(&self) -> (Align2, egui::Vec2) {
+        match self.position {
+            WindowPosition::TopLeft => (
+                Align2::LEFT_TOP,
+                egui::vec2(self.margin as f32, self.margin as f32),
+            ),
+            WindowPosition::TopRight => (
+                Align2::RIGHT_TOP,
+                egui::vec2(-(self.margin as f32), self.margin as f32),
+            ),
+            WindowPosition::BottomLeft => (
+                Align2::LEFT_BOTTOM,
+                egui::vec2(self.margin as f32, -(self.margin as f32)),
+            ),
+            WindowPosition::BottomRight => (
+                Align2::RIGHT_BOTTOM,
+                egui::vec2(-(self.margin as f32), -(self.margin as f32)),
+            ),
+            WindowPosition::Bottom => (
+                Align2::CENTER_BOTTOM,
+                egui::vec2(0.0, -(self.margin as f32)),
+            ),
+            WindowPosition::Top => (Align2::CENTER_TOP, egui::vec2(0.0, self.margin as f32)),
+        }
+    }
 }
 
 impl eframe::App for Overlay {
@@ -127,19 +156,12 @@ impl eframe::App for Overlay {
             None => true,
         };
 
-        let anchor = match self.position {
-            WindowPosition::TopLeft => Align2::LEFT_TOP,
-            WindowPosition::TopRight => Align2::RIGHT_TOP,
-            WindowPosition::BottomLeft => Align2::LEFT_BOTTOM,
-            WindowPosition::BottomRight => Align2::RIGHT_BOTTOM,
-            WindowPosition::Bottom => Align2::CENTER_BOTTOM,
-            WindowPosition::Top => Align2::CENTER_TOP,
-        };
+        let anchor_params = self.get_anchor_params();
 
         Window::new("QMK Layout Helper")
             .open(&mut window_open)
             .fixed_size(egui::vec2(self.size.0 as f32, self.size.1 as f32))
-            .anchor(anchor, [0.0, 0.0])
+            .anchor(anchor_params.0, anchor_params.1)
             .frame(egui::Frame::NONE.fill(egui::Color32::TRANSPARENT))
             .fade_out(true)
             .title_bar(false)
@@ -162,16 +184,23 @@ impl eframe::App for Overlay {
                         egui::pos2(key.x * unit_size, key.y * unit_size) + window_pos.to_vec2(),
                         egui::vec2(key.w * unit_size, key.h * unit_size),
                     )
-                    .shrink(0.05 * unit_size);
+                    .shrink(0.06 * unit_size);
 
                     let base_keycode = self.keyboard.matrix[0][key.row as usize][key.col as usize];
                     let base_color = keycode_label::get_keycode_label(base_keycode).color;
+                    let stroke = egui::Stroke::new(
+                        1.0,
+                        base_color.lerp_to_gamma(
+                            egui::Color32::from_rgba_premultiplied(255, 255, 255, 90),
+                            0.05,
+                        ),
+                    );
                     ui.painter().rect(
                         rect,
-                        0.12 * unit_size,
+                        0.1 * unit_size,
                         base_color,
-                        egui::Stroke::NONE,
-                        egui::StrokeKind::Middle,
+                        stroke,
+                        egui::StrokeKind::Outside,
                     );
 
                     let font = egui::FontId::proportional(0.3 * unit_size);

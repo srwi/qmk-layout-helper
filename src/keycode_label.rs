@@ -26,7 +26,7 @@ impl Default for KeycodeLabel {
         KeycodeLabel {
             long: Some("n/a".to_string()),
             short: None,
-            color: egui::Color32::from_rgba_unmultiplied(150, 150, 150, 225),
+            color: egui::Color32::from_rgba_unmultiplied(83, 83, 83, 239),
         }
     }
 }
@@ -212,8 +212,8 @@ fn get_layer_keycode_label(keycode_bytes: u16) -> Option<KeycodeLabel> {
 fn get_basic_keycode_label(keycode_bytes: u16) -> Option<KeycodeLabel> {
     let keycode = Keycode::try_from(keycode_bytes).ok()?;
 
-    let color_modifier = egui::Color32::from_rgba_premultiplied(105, 105, 105, 225);
-    let color_special = egui::Color32::from_rgba_premultiplied(65, 65, 65, 225);
+    let color_modifier = egui::Color32::from_rgba_premultiplied(48, 48, 48, 239);
+    let color_special = egui::Color32::from_rgba_premultiplied(58, 158, 147, 239);
 
     match keycode {
         Keycode::KC_NO => Some(KeycodeLabel {
