@@ -1,14 +1,9 @@
 use clap::Parser;
 use std::path::PathBuf;
 
-fn parse_size(s: &str) -> Result<(u32, u32), String> {
-    let parts: Vec<&str> = s.split(',').collect();
-    if parts.len() != 2 {
-        return Err("Size must be in the format 'width,height'".to_string());
-    }
-    let width: u32 = parts[0].parse().map_err(|_| "Invalid width")?;
-    let height: u32 = parts[1].parse().map_err(|_| "Invalid height")?;
-    Ok((width, height))
+fn parse_scale(s: &str) -> Result<f32, String> {
+    s.parse::<f32>()
+        .map_err(|_| "Scale must be a floating point number".to_string())
 }
 
 #[derive(clap::ValueEnum, Clone)]
@@ -37,11 +32,11 @@ pub struct Cli {
 
     #[arg(
         long,
-        value_parser = parse_size,
-        default_value = "700,240",
-        help = "Size of the overlay window in the format 'width,height'"
+        value_parser = parse_scale,
+        default_value = "60.0",
+        help = "Size of a single key unit in pixels"
     )]
-    pub size: (u32, u32),
+    pub size: f32,
 
     #[arg(
         long,

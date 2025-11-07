@@ -12,7 +12,7 @@ pub struct Overlay {
     keyboard: Keyboard,
     current_layer: Arc<Mutex<u8>>,
     time_to_hide_overlay: Arc<Mutex<Option<Instant>>>,
-    size: (u32, u32),
+    size: f32,
     margin: u32,
     position: WindowPosition,
 }
@@ -21,7 +21,7 @@ impl Overlay {
     pub fn new(
         keyboard: Keyboard,
         ctx: egui::Context,
-        size: (u32, u32),
+        size: f32,
         margin: u32,
         position: WindowPosition,
     ) -> Self {
@@ -63,13 +63,6 @@ impl Overlay {
             margin,
             position,
         }
-    }
-
-    fn calculate_unit_size(&self, available_width: f32, available_height: f32) -> f32 {
-        let (layout_width, layout_height) = self.keyboard.keyboard_info.get_dimensions();
-        let width_ratio = available_width / layout_width;
-        let height_ratio = available_height / layout_height;
-        width_ratio.min(height_ratio)
     }
 
     fn generate_key_label_galley(
@@ -160,20 +153,21 @@ impl eframe::App for Overlay {
 
         Window::new("QMK Layout Helper")
             .open(&mut window_open)
-            .fixed_size(egui::vec2(self.size.0 as f32, self.size.1 as f32))
+            .auto_sized()
             .anchor(anchor_params.0, anchor_params.1)
             .frame(egui::Frame::NONE.fill(egui::Color32::TRANSPARENT))
             .fade_out(true)
             .title_bar(false)
             .show(ctx, |ui| {
-                // Required as workaround for https://github.com/emilk/egui/issues/498
-                ui.set_width(ui.available_width());
-                ui.set_height(ui.available_height());
-
                 let layer = *self.current_layer.lock().unwrap();
 
-                let available_rect = ui.available_size();
-                let unit_size = self.calculate_unit_size(available_rect.x, available_rect.y);
+                // Allow auto_sized window to shrink to fit content
+                let layout_size = self.keyboard.keyboard_info.get_dimensions();
+                ui.allocate_space(egui::vec2(
+                    layout_size.0 * self.size,
+                    layout_size.1 * self.size,
+                ));
+
                 let window_pos = ui.min_rect().min;
                 for key in &self.keyboard.keyboard_info.keys {
                     let keycode =
@@ -181,10 +175,10 @@ impl eframe::App for Overlay {
                     let keycode_label = keycode_label::get_keycode_label(keycode);
 
                     let rect = egui::Rect::from_min_size(
-                        egui::pos2(key.x * unit_size, key.y * unit_size) + window_pos.to_vec2(),
-                        egui::vec2(key.w * unit_size, key.h * unit_size),
+                        egui::pos2(key.x * self.size, key.y * self.size) + window_pos.to_vec2(),
+                        egui::vec2(key.w * self.size, key.h * self.size),
                     )
-                    .shrink(0.06 * unit_size);
+                    .shrink(0.06 * self.size);
 
                     let base_keycode = self.keyboard.matrix[0][key.row as usize][key.col as usize];
                     let base_color = keycode_label::get_keycode_label(base_keycode).color;
@@ -197,13 +191,13 @@ impl eframe::App for Overlay {
                     );
                     ui.painter().rect(
                         rect,
-                        0.1 * unit_size,
+                        0.1 * self.size,
                         base_color,
                         stroke,
                         egui::StrokeKind::Outside,
                     );
 
-                    let font = egui::FontId::proportional(0.3 * unit_size);
+                    let font = egui::FontId::proportional(0.3 * self.size);
 
                     if let Some(label_galley) =
                         self.generate_key_label_galley(ui, keycode_label, rect, font)
