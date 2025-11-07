@@ -3,6 +3,7 @@ mod keyboard;
 mod keyboard_layout;
 mod keycode_label;
 mod overlay;
+mod tray;
 
 use clap::Parser;
 use eframe::egui;
@@ -13,6 +14,8 @@ use keyboard_layout::KeyboardInfo;
 use overlay::Overlay;
 
 fn main() -> Result<(), eframe::Error> {
+    let _tray_icon = tray::create_tray_icon();
+
     let cli = Cli::parse();
 
     let keyboard_config = cli.keyboard_config.to_str().expect("Invalid path");
