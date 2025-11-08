@@ -23,7 +23,7 @@ fn main() -> Result<(), eframe::Error> {
 
     let keyboard_info =
         KeyboardInfo::new(&keyboard_config, &layout_name).expect("Failed to read keyboard layout.");
-    let keyboard = Keyboard::new(keyboard_info);
+    let keyboard = Keyboard::new(keyboard_info, cli.timeout);
 
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()

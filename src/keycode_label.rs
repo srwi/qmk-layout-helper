@@ -1,4 +1,4 @@
-use eframe::egui;
+use eframe::egui::{self, Color32};
 use qmk_via_api::keycodes::Keycode;
 use std::ops::Range;
 
@@ -36,12 +36,19 @@ impl Default for KeycodeLabel {
     }
 }
 
-pub fn get_keycode_color(layer: u8, kind: KeycodeKind) -> (egui::Color32, egui::Color32) {
+pub fn get_keycode_color(
+    layer: u8,
+    kind: KeycodeKind,
+    desaturate: bool,
+) -> (egui::Color32, egui::Color32, egui::Color32) {
     const ALPHA: u8 = 239;
+    const DESATURATE_FACTOR: f32 = 0.7;
+
     const BLACK: egui::Color32 = egui::Color32::from_rgba_premultiplied(0, 0, 0, ALPHA);
+    const GRAY: egui::Color32 = egui::Color32::from_rgba_premultiplied(83, 83, 83, ALPHA);
 
     let mut background_color = match layer {
-        0 => egui::Color32::from_rgba_unmultiplied(83, 83, 83, ALPHA),
+        0 => GRAY,
         1 => egui::Color32::from_rgba_unmultiplied(58, 158, 147, ALPHA),
         2 => egui::Color32::from_rgba_unmultiplied(158, 58, 147, ALPHA),
         3 => egui::Color32::from_rgba_unmultiplied(147, 158, 58, ALPHA),
@@ -56,9 +63,20 @@ pub fn get_keycode_color(layer: u8, kind: KeycodeKind) -> (egui::Color32, egui::
         background_color = background_color.lerp_to_gamma(BLACK, 0.3);
     }
 
-    let border_color = background_color.lerp_to_gamma(BLACK, 0.2);
+    let mut border_color = background_color.lerp_to_gamma(BLACK, 0.2);
 
-    (background_color, border_color)
+    if desaturate && layer != 0 {
+        background_color = background_color.lerp_to_gamma(GRAY, DESATURATE_FACTOR);
+        border_color = border_color.lerp_to_gamma(GRAY, DESATURATE_FACTOR);
+    }
+
+    let font_color = if desaturate {
+        egui::Color32::WHITE.gamma_multiply(1.0 - DESATURATE_FACTOR)
+    } else {
+        egui::Color32::WHITE
+    };
+
+    (background_color, border_color, font_color)
 }
 
 pub fn is_transparent_keycode(bytes: u16) -> bool {
@@ -143,7 +161,7 @@ fn get_basic_keycode_label(keycode_bytes: u16, layer: u8) -> Option<KeycodeLabel
             ..Default::default()
         }),
         Keycode::KC_TRANSPARENT => Some(KeycodeLabel {
-            long: Some("🔽".to_string()),
+            long: Some("".to_string()),
             layer,
             ..Default::default()
         }),

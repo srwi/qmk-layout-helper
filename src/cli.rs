@@ -1,11 +1,6 @@
 use clap::Parser;
 use std::path::PathBuf;
 
-fn parse_scale(s: &str) -> Result<f32, String> {
-    s.parse::<f32>()
-        .map_err(|_| "Scale must be a floating point number".to_string())
-}
-
 #[derive(clap::ValueEnum, Clone)]
 pub enum WindowPosition {
     TopLeft,
@@ -32,11 +27,11 @@ pub struct Cli {
 
     #[arg(
         long,
-        value_parser = parse_scale,
-        default_value = "60.0",
+        value_parser = clap::value_parser!(i32).range(5..),
+        default_value = "60",
         help = "Size of a single key unit in pixels"
     )]
-    pub size: f32,
+    pub size: i32,
 
     #[arg(
         long,
@@ -48,8 +43,8 @@ pub struct Cli {
 
     #[arg(
         long,
-        value_parser = clap::value_parser!(u64).range(100..),
-        default_value = "5000",
+        value_parser = clap::value_parser!(u64).range(0..),
+        default_value = "2000",
         help = "Timeout for the overlay in milliseconds"
     )]
     pub timeout: u64,

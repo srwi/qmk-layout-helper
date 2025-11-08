@@ -4,15 +4,10 @@ use crate::keycode_label;
 use crate::keycode_label::KeycodeLabel;
 
 use eframe::egui::{self, Align2, Window};
-use qmk_via_api::keycodes::Keycode;
-use std::sync::{Arc, Mutex};
-use std::thread;
-use std::time::{Duration, Instant};
+use std::time::Instant;
 
 pub struct Overlay {
     keyboard: Keyboard,
-    current_layer: Arc<Mutex<u8>>,
-    time_to_hide_overlay: Arc<Mutex<Option<Instant>>>,
     size: f32,
     margin: u32,
     position: WindowPosition,
@@ -21,48 +16,16 @@ pub struct Overlay {
 impl Overlay {
     pub fn new(
         keyboard: Keyboard,
-        ctx: egui::Context,
-        size: f32,
+        _ctx: egui::Context,
+        size: i32,
         margin: u32,
         position: WindowPosition,
     ) -> Self {
-        let current_layer = Arc::new(Mutex::new(0));
-        let time_to_hide_overlay = Arc::new(Mutex::new(Some(Instant::now())));
-        let api = qmk_via_api::api::KeyboardApi::new(
-            keyboard.keyboard_info.vid,
-            keyboard.keyboard_info.pid,
-            0xff60,
-        )
-        .expect("Failed to connect to device.");
-
-        let current_layer_clone = Arc::clone(&current_layer);
-        let time_to_hide_overlay_clone = Arc::clone(&time_to_hide_overlay);
-
-        thread::spawn(move || loop {
-            if let Ok(response) = api.hid_read() {
-                if response[0] == 0x01 {
-                    let new_layer = response[1];
-                    *current_layer_clone.lock().unwrap() = new_layer;
-
-                    if new_layer == 0 {
-                        *time_to_hide_overlay_clone.lock().unwrap() =
-                            Some(Instant::now() + Duration::from_secs(1));
-                    } else {
-                        *time_to_hide_overlay_clone.lock().unwrap() = None;
-                    }
-
-                    ctx.request_repaint();
-                }
-            }
-        });
-
         Self {
             keyboard,
-            current_layer,
-            time_to_hide_overlay,
-            size,
             margin,
             position,
+            size: size as f32,
         }
     }
 
@@ -72,11 +35,9 @@ impl Overlay {
         keycode_label: KeycodeLabel,
         rect: egui::Rect,
         font: egui::FontId,
+        color: egui::Color32,
     ) -> Option<std::sync::Arc<egui::Galley>> {
-        let create_galley = |text: String| {
-            ui.painter()
-                .layout_no_wrap(text, font.clone(), egui::Color32::WHITE)
-        };
+        let create_galley = |text: String| ui.painter().layout_no_wrap(text, font.clone(), color);
         let galley_fits =
             |galley: &std::sync::Arc<egui::Galley>| galley.rect.width() <= rect.width() * 0.85;
 
@@ -145,7 +106,7 @@ impl eframe::App for Overlay {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         ctx.send_viewport_cmd(egui::ViewportCommand::MousePassthrough(true));
 
-        let mut window_open = match self.time_to_hide_overlay.lock().unwrap().as_ref() {
+        let mut window_open = match self.keyboard.time_to_hide_overlay.lock().unwrap().as_ref() {
             Some(time_to_hide) => Instant::now() < *time_to_hide,
             None => true,
         };
@@ -160,8 +121,6 @@ impl eframe::App for Overlay {
             .fade_out(true)
             .title_bar(false)
             .show(ctx, |ui| {
-                let layer = *self.current_layer.lock().unwrap();
-
                 // Allow auto_sized window to shrink to fit content
                 let layout_size = self.keyboard.keyboard_info.get_dimensions();
                 ui.allocate_space(egui::vec2(
@@ -170,24 +129,32 @@ impl eframe::App for Overlay {
                 ));
 
                 let window_pos = ui.min_rect().min;
+                let active_layers = self.keyboard.get_active_layers();
+
                 for key in &self.keyboard.keyboard_info.keys {
-                    let label = (0..=layer as usize)
-                        .rev()
-                        .find_map(|l| {
-                            let bytes = self.keyboard.matrix[l][key.row as usize][key.col as usize];
-                            if !keycode_label::is_transparent_keycode(bytes) {
-                                Some(keycode_label::get_keycode_label(bytes, l as u8))
-                            } else {
-                                None
-                            }
+                    let layer = active_layers
+                        .iter()
+                        .find(|&&layer| {
+                            let bytes = self.keyboard.matrix[layer as usize][key.row as usize]
+                                [key.col as usize];
+                            !keycode_label::is_transparent_keycode(bytes)
                         })
-                        .unwrap_or_else(|| {
-                            keycode_label::get_keycode_label(Keycode::KC_NO as u16, layer)
-                        });
+                        .copied()
+                        .unwrap_or(0);
+
+                    let bytes =
+                        self.keyboard.matrix[layer as usize][key.row as usize][key.col as usize];
+                    let label = keycode_label::get_keycode_label(bytes, layer);
 
                     let first_layer_bytes =
                         self.keyboard.matrix[0][key.row as usize][key.col as usize];
                     let first_layer_label = keycode_label::get_keycode_label(first_layer_bytes, 0);
+
+                    let (fill_color, stroke_color, font_color) = keycode_label::get_keycode_color(
+                        label.layer,
+                        first_layer_label.kind,
+                        layer == 0 && active_layers.len() > 1,
+                    );
 
                     // Draw key background
                     let rect = egui::Rect::from_min_size(
@@ -195,24 +162,21 @@ impl eframe::App for Overlay {
                         egui::vec2(key.w * self.size, key.h * self.size),
                     )
                     .shrink(0.06 * self.size);
-                    let (fill, stroke) =
-                        keycode_label::get_keycode_color(label.layer, first_layer_label.kind);
                     ui.painter().rect(
                         rect,
                         0.1 * self.size,
-                        fill,
-                        egui::Stroke::new(1.0, stroke),
+                        fill_color,
+                        egui::Stroke::new(1.0, stroke_color),
                         egui::StrokeKind::Outside,
                     );
 
                     // Draw key label
-                    let font = egui::FontId::proportional(0.3 * self.size);
+                    let font = egui::FontId::proportional(0.28 * self.size);
                     if let Some(label_galley) =
-                        self.generate_key_label_galley(ui, label, rect, font)
+                        self.generate_key_label_galley(ui, label, rect, font, font_color)
                     {
                         let label_pos = rect.center() - label_galley.rect.center().to_vec2();
-                        ui.painter()
-                            .galley(label_pos, label_galley, egui::Color32::WHITE);
+                        ui.painter().galley(label_pos, label_galley, font_color);
                     }
                 }
             });
