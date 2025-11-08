@@ -172,33 +172,33 @@ impl eframe::App for Overlay {
                 for key in &self.keyboard.keyboard_info.keys {
                     let keycode =
                         self.keyboard.matrix[layer as usize][key.row as usize][key.col as usize];
-                    let keycode_label = keycode_label::get_keycode_label(keycode);
+                    let keycode_label = keycode_label::get_keycode_label(keycode, layer);
 
+                    let first_layer_keycode =
+                        self.keyboard.matrix[0][key.row as usize][key.col as usize];
+                    let first_layer_keycode =
+                        keycode_label::get_keycode_label(first_layer_keycode, 0);
+
+                    // Draw key background
                     let rect = egui::Rect::from_min_size(
                         egui::pos2(key.x * self.size, key.y * self.size) + window_pos.to_vec2(),
                         egui::vec2(key.w * self.size, key.h * self.size),
                     )
                     .shrink(0.06 * self.size);
-
-                    let base_keycode = self.keyboard.matrix[0][key.row as usize][key.col as usize];
-                    let base_color = keycode_label::get_keycode_label(base_keycode).color;
-                    let stroke = egui::Stroke::new(
-                        1.0,
-                        base_color.lerp_to_gamma(
-                            egui::Color32::from_rgba_premultiplied(255, 255, 255, 90),
-                            0.05,
-                        ),
+                    let (fill, stroke) = keycode_label::get_keycode_color(
+                        keycode_label.layer,
+                        first_layer_keycode.kind,
                     );
                     ui.painter().rect(
                         rect,
                         0.1 * self.size,
-                        base_color,
-                        stroke,
+                        fill,
+                        egui::Stroke::new(1.0, stroke),
                         egui::StrokeKind::Outside,
                     );
 
+                    // Draw key label
                     let font = egui::FontId::proportional(0.3 * self.size);
-
                     if let Some(label_galley) =
                         self.generate_key_label_galley(ui, keycode_label, rect, font)
                     {
