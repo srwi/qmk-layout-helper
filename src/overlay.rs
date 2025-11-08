@@ -4,6 +4,7 @@ use crate::keycode_label;
 use crate::keycode_label::KeycodeLabel;
 
 use eframe::egui::{self, Align2, Window};
+use qmk_via_api::keycodes::Keycode;
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::{Duration, Instant};
@@ -170,14 +171,23 @@ impl eframe::App for Overlay {
 
                 let window_pos = ui.min_rect().min;
                 for key in &self.keyboard.keyboard_info.keys {
-                    let keycode =
-                        self.keyboard.matrix[layer as usize][key.row as usize][key.col as usize];
-                    let keycode_label = keycode_label::get_keycode_label(keycode, layer);
+                    let label = (0..=layer as usize)
+                        .rev()
+                        .find_map(|l| {
+                            let bytes = self.keyboard.matrix[l][key.row as usize][key.col as usize];
+                            if !keycode_label::is_transparent_keycode(bytes) {
+                                Some(keycode_label::get_keycode_label(bytes, l as u8))
+                            } else {
+                                None
+                            }
+                        })
+                        .unwrap_or_else(|| {
+                            keycode_label::get_keycode_label(Keycode::KC_NO as u16, layer)
+                        });
 
-                    let first_layer_keycode =
+                    let first_layer_bytes =
                         self.keyboard.matrix[0][key.row as usize][key.col as usize];
-                    let first_layer_keycode =
-                        keycode_label::get_keycode_label(first_layer_keycode, 0);
+                    let first_layer_label = keycode_label::get_keycode_label(first_layer_bytes, 0);
 
                     // Draw key background
                     let rect = egui::Rect::from_min_size(
@@ -185,10 +195,8 @@ impl eframe::App for Overlay {
                         egui::vec2(key.w * self.size, key.h * self.size),
                     )
                     .shrink(0.06 * self.size);
-                    let (fill, stroke) = keycode_label::get_keycode_color(
-                        keycode_label.layer,
-                        first_layer_keycode.kind,
-                    );
+                    let (fill, stroke) =
+                        keycode_label::get_keycode_color(label.layer, first_layer_label.kind);
                     ui.painter().rect(
                         rect,
                         0.1 * self.size,
@@ -200,7 +208,7 @@ impl eframe::App for Overlay {
                     // Draw key label
                     let font = egui::FontId::proportional(0.3 * self.size);
                     if let Some(label_galley) =
-                        self.generate_key_label_galley(ui, keycode_label, rect, font)
+                        self.generate_key_label_galley(ui, label, rect, font)
                     {
                         let label_pos = rect.center() - label_galley.rect.center().to_vec2();
                         ui.painter()

@@ -61,6 +61,13 @@ pub fn get_keycode_color(layer: u8, kind: KeycodeKind) -> (egui::Color32, egui::
     (background_color, border_color)
 }
 
+pub fn is_transparent_keycode(bytes: u16) -> bool {
+    match Keycode::try_from(bytes) {
+        Ok(Keycode::KC_TRANSPARENT) => true,
+        _ => false,
+    }
+}
+
 pub fn get_keycode_label(bytes: u16, layer: u8) -> KeycodeLabel {
     get_basic_keycode_label(bytes, layer)
         .or_else(|| get_layer_keycode_label(bytes, layer))
@@ -136,7 +143,7 @@ fn get_basic_keycode_label(keycode_bytes: u16, layer: u8) -> Option<KeycodeLabel
             ..Default::default()
         }),
         Keycode::KC_TRANSPARENT => Some(KeycodeLabel {
-            long: None,
+            long: Some("🔽".to_string()),
             layer,
             ..Default::default()
         }),
