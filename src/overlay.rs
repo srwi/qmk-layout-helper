@@ -131,20 +131,13 @@ impl eframe::App for Overlay {
                 let window_pos = ui.min_rect().min;
 
                 for key in &self.keyboard.keyboard_info.keys {
-                    let (effective_layer, is_default_layer) = self
+                    let (effective_layer, is_background_key) = self
                         .keyboard
                         .get_effective_key_layer(key.row as usize, key.col as usize);
 
                     let bytes = self.keyboard.matrix[effective_layer as usize][key.row as usize]
                         [key.col as usize];
                     let keycode_label = keycode_label::get_keycode_label(bytes);
-
-                    if (key.row == 0 && key.col == 0) {
-                        println!(
-                            "Debug: key at (0,0) has effective layer {} and is_default_layer {} and keycode_label {}",
-                            effective_layer, is_default_layer, keycode_label.layer_ref.unwrap_or(0)
-                        );
-                    }
 
                     let first_layer_bytes =
                         self.keyboard.matrix[0][key.row as usize][key.col as usize];
@@ -154,7 +147,7 @@ impl eframe::App for Overlay {
                     let (fill_color, stroke_color, font_color) = keycode_label::get_keycode_color(
                         keycode_label.layer_ref.unwrap_or(effective_layer),
                         first_layer_keycode_kind,
-                        is_default_layer,
+                        is_background_key,
                     );
 
                     // Draw key background

@@ -98,18 +98,21 @@ impl Keyboard {
         let default_layer_state = *self.default_layer_state.lock().unwrap();
         let num_layers = self.matrix.len().min(32);
 
+        // Track if there is any active momentary layer above the effective layer (i.e, key should be shown as background key)
+        let mut active_layer_above = false;
+
         for i in (1..num_layers).rev() {
             let layer_mask = 1u32 << (i as u32);
-            let is_default_layer = (default_layer_state & layer_mask) != 0;
-            let is_active_layer = (layer_state & layer_mask) != 0;
-            if is_active_layer || is_default_layer {
+            let is_active_default_layer = (default_layer_state & layer_mask) != 0;
+            let is_active_momentary_layer = (layer_state & layer_mask) != 0;
+            if is_active_momentary_layer || is_active_default_layer {
                 if self.matrix[i][row][col] != Keycode::KC_TRANSPARENT as u16 {
-                    return (i as u8, is_default_layer);
+                    return (i as u8, is_active_default_layer && active_layer_above);
                 }
             }
+            active_layer_above |= is_active_momentary_layer;
         }
 
-        // The first layer is always the default fallback
-        (0, true)
+        (0, active_layer_above)
     }
 }

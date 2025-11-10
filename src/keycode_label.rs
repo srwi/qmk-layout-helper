@@ -45,20 +45,26 @@ pub fn get_keycode_color(
     const DESATURATE_FACTOR: f32 = 0.7;
 
     const BLACK: egui::Color32 = egui::Color32::from_rgba_premultiplied(0, 0, 0, ALPHA);
-    const GRAY: egui::Color32 = egui::Color32::from_rgba_premultiplied(83, 83, 83, ALPHA);
+    const LAYER_0: egui::Color32 = egui::Color32::from_rgba_premultiplied(83, 83, 83, ALPHA);
+    const LAYER_1: egui::Color32 = egui::Color32::from_rgba_premultiplied(80, 140, 115, ALPHA);
+    const LAYER_2: egui::Color32 = egui::Color32::from_rgba_premultiplied(100, 115, 150, ALPHA);
+    const LAYER_3: egui::Color32 = egui::Color32::from_rgba_premultiplied(140, 110, 150, ALPHA);
+    const LAYER_4: egui::Color32 = egui::Color32::from_rgba_premultiplied(95, 121, 127, ALPHA);
+    const LAYER_5: egui::Color32 = egui::Color32::from_rgba_premultiplied(147, 137, 110, ALPHA);
+    const LAYER_N: egui::Color32 = egui::Color32::from_rgba_premultiplied(127, 127, 127, ALPHA);
 
     let mut background_color = match layer {
-        0 => GRAY,
-        1 => egui::Color32::from_rgba_unmultiplied(58, 158, 147, ALPHA),
-        2 => egui::Color32::from_rgba_unmultiplied(158, 58, 147, ALPHA),
-        3 => egui::Color32::from_rgba_unmultiplied(147, 158, 58, ALPHA),
-        4 => egui::Color32::from_rgba_unmultiplied(147, 58, 158, ALPHA),
-        5 => egui::Color32::from_rgba_unmultiplied(58, 147, 158, ALPHA),
-        _ => egui::Color32::from_rgba_unmultiplied(100, 100, 100, ALPHA),
+        0 => LAYER_0,
+        1 => LAYER_1,
+        2 => LAYER_2,
+        3 => LAYER_3,
+        4 => LAYER_4,
+        5 => LAYER_5,
+        _ => LAYER_N,
     };
 
     if kind == KeycodeKind::Special {
-        background_color = background_color.lerp_to_gamma(BLACK, 0.8);
+        background_color = background_color.lerp_to_gamma(BLACK, 0.6);
     } else if kind == KeycodeKind::Modifier {
         background_color = background_color.lerp_to_gamma(BLACK, 0.3);
     }
@@ -67,8 +73,8 @@ pub fn get_keycode_color(
 
     // Never desaturate layer 0
     if desaturate && layer != 0 {
-        background_color = background_color.lerp_to_gamma(GRAY, DESATURATE_FACTOR);
-        border_color = border_color.lerp_to_gamma(GRAY, DESATURATE_FACTOR);
+        background_color = background_color.lerp_to_gamma(LAYER_0, DESATURATE_FACTOR);
+        border_color = border_color.lerp_to_gamma(LAYER_0, DESATURATE_FACTOR);
     }
 
     let font_color = if desaturate {
@@ -108,10 +114,6 @@ fn get_layer_keycode_label(keycode_bytes: u16) -> Option<KeycodeLabel> {
             let l = (b - QK_MOMENTARY.start) as u8;
             (Some(format!("MO({})", l)), Some(l))
         }
-        b if QK_DEF_LAYER.contains(&b) => {
-            let l = (b - QK_DEF_LAYER.start) as u8;
-            (Some(format!("DF({})", l)), Some(l))
-        }
         b if QK_TOGGLE_LAYER.contains(&b) => {
             let l = (b - QK_TOGGLE_LAYER.start) as u8;
             (Some(format!("TG({})", l)), Some(l))
@@ -123,6 +125,10 @@ fn get_layer_keycode_label(keycode_bytes: u16) -> Option<KeycodeLabel> {
         b if QK_LAYER_TAP_TOGGLE.contains(&b) => {
             let l = (b - QK_LAYER_TAP_TOGGLE.start) as u8;
             (Some(format!("TT({})", l)), Some(l))
+        }
+        b if QK_DEF_LAYER.contains(&b) => {
+            let l = (b - QK_DEF_LAYER.start) as u8;
+            (Some(format!("DF({})", l)), None)
         }
         b if QK_KB.contains(&b) => {
             let n = b - QK_KB.start;
