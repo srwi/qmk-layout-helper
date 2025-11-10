@@ -16,12 +16,13 @@ Unfortunately stock QMK firmware does not report layer changes to the operating 
   #include "raw_hid.h"
   #include "usb_descriptor.h"
   
-  // Notify VIA of layer changes
+  // Notify VIA about layer changes
   layer_state_t layer_state_set_user(layer_state_t state) {
-      uint8_t layer = get_highest_layer(state);
-      uint8_t data[RAW_EPSIZE] = { 0 };
-      data[0] = 0x01;
-      data[1] = layer;
+      uint8_t data[RAW_EPSIZE] = {0};
+      data[0] = 0xff;
+      data[1] = sizeof(layer_state_t);
+      memcpy(&data[2], &default_layer_state, sizeof(layer_state_t));
+      memcpy(&data[2 + sizeof(layer_state_t)], &state, sizeof(layer_state_t));
       raw_hid_send(data, RAW_EPSIZE);
       return state;
   }

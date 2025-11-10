@@ -62,12 +62,20 @@ impl KeyboardInfo {
             });
         }
 
+        let is_split_keyboard = json
+            .get("split")
+            .unwrap_or_default()
+            .get("enabled")
+            .and_then(|v| v.as_bool())
+            .unwrap_or(false);
+        let row_multiplier = if is_split_keyboard { 2 } else { 1 };
         let rows = json["matrix_pins"]
             .get("rows")
             .unwrap()
             .as_array()
             .unwrap()
-            .len();
+            .len()
+            * row_multiplier;
         let cols = json["matrix_pins"]
             .get("cols")
             .unwrap()
