@@ -129,31 +129,32 @@ impl eframe::App for Overlay {
                 ));
 
                 let window_pos = ui.min_rect().min;
-                let active_layers = self.keyboard.get_active_layers();
 
                 for key in &self.keyboard.keyboard_info.keys {
-                    let layer = active_layers
-                        .iter()
-                        .find(|&&layer| {
-                            let bytes = self.keyboard.matrix[layer as usize][key.row as usize]
-                                [key.col as usize];
-                            !keycode_label::is_transparent_keycode(bytes)
-                        })
-                        .copied()
-                        .unwrap_or(0);
+                    let (effective_layer, is_default_layer) = self
+                        .keyboard
+                        .get_effective_key_layer(key.row as usize, key.col as usize);
 
-                    let bytes =
-                        self.keyboard.matrix[layer as usize][key.row as usize][key.col as usize];
-                    let label = keycode_label::get_keycode_label(bytes, layer);
+                    let bytes = self.keyboard.matrix[effective_layer as usize][key.row as usize]
+                        [key.col as usize];
+                    let keycode_label = keycode_label::get_keycode_label(bytes);
+
+                    if (key.row == 0 && key.col == 0) {
+                        println!(
+                            "Debug: key at (0,0) has effective layer {} and is_default_layer {} and keycode_label {}",
+                            effective_layer, is_default_layer, keycode_label.layer_ref.unwrap_or(0)
+                        );
+                    }
 
                     let first_layer_bytes =
                         self.keyboard.matrix[0][key.row as usize][key.col as usize];
-                    let first_layer_label = keycode_label::get_keycode_label(first_layer_bytes, 0);
+                    let first_layer_keycode_kind =
+                        keycode_label::get_keycode_label(first_layer_bytes).kind;
 
                     let (fill_color, stroke_color, font_color) = keycode_label::get_keycode_color(
-                        label.layer,
-                        first_layer_label.kind,
-                        layer == 0 && active_layers.len() > 1,
+                        keycode_label.layer_ref.unwrap_or(effective_layer),
+                        first_layer_keycode_kind,
+                        is_default_layer,
                     );
 
                     // Draw key background
@@ -173,7 +174,7 @@ impl eframe::App for Overlay {
                     // Draw key label
                     let font = egui::FontId::proportional(0.28 * self.size);
                     if let Some(label_galley) =
-                        self.generate_key_label_galley(ui, label, rect, font, font_color)
+                        self.generate_key_label_galley(ui, keycode_label, rect, font, font_color)
                     {
                         let label_pos = rect.center() - label_galley.rect.center().to_vec2();
                         ui.painter().galley(label_pos, label_galley, font_color);
