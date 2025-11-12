@@ -160,7 +160,7 @@ pub fn get_basic_keycode_label(keycode_bytes: u16) -> Option<KeycodeLabel> {
         }),
         Keycode::KC_ENTER => Some(KeycodeLabel {
             long: Some("Enter".to_string()),
-            short: Some("Ent".to_string()),
+            symbol: Some(egui_phosphor::regular::ARROW_ELBOW_DOWN_LEFT.to_string()),
             kind: KeycodeKind::Special,
             ..Default::default()
         }),
@@ -171,12 +171,13 @@ pub fn get_basic_keycode_label(keycode_bytes: u16) -> Option<KeycodeLabel> {
         }),
         Keycode::KC_BACKSPACE => Some(KeycodeLabel {
             long: Some("Backspace".to_string()),
-            short: Some("Bksp".to_string()),
+            symbol: Some(egui_phosphor::regular::BACKSPACE.to_string()),
             kind: KeycodeKind::Modifier,
             ..Default::default()
         }),
         Keycode::KC_TAB => Some(KeycodeLabel {
             long: Some("Tab".to_string()),
+            symbol: Some(egui_phosphor::regular::ARROWS_LEFT_RIGHT.to_string()),
             kind: KeycodeKind::Modifier,
             ..Default::default()
         }),
@@ -236,6 +237,7 @@ pub fn get_basic_keycode_label(keycode_bytes: u16) -> Option<KeycodeLabel> {
         Keycode::KC_CAPS_LOCK => Some(KeycodeLabel {
             long: Some("Caps Lock".to_string()),
             short: Some("Caps".to_string()),
+            symbol: Some(egui_phosphor::regular::ARROW_FAT_LINE_UP.to_string()),
             kind: KeycodeKind::Modifier,
             ..Default::default()
         }),
@@ -317,7 +319,8 @@ pub fn get_basic_keycode_label(keycode_bytes: u16) -> Option<KeycodeLabel> {
             ..Default::default()
         }),
         Keycode::KC_DELETE => Some(KeycodeLabel {
-            long: Some("Del".to_string()),
+            long: Some("Delete".to_string()),
+            short: Some("Del".to_string()),
             ..Default::default()
         }),
         Keycode::KC_END => Some(KeycodeLabel {
@@ -330,22 +333,26 @@ pub fn get_basic_keycode_label(keycode_bytes: u16) -> Option<KeycodeLabel> {
             ..Default::default()
         }),
         Keycode::KC_RIGHT => Some(KeycodeLabel {
-            long: Some("➡".to_string()),
+            long: None,
+            symbol: Some(egui_phosphor::regular::ARROW_RIGHT.to_string()),
             kind: KeycodeKind::Modifier,
             ..Default::default()
         }),
         Keycode::KC_LEFT => Some(KeycodeLabel {
-            long: Some("⬅".to_string()),
+            long: None,
+            symbol: Some(egui_phosphor::regular::ARROW_LEFT.to_string()),
             kind: KeycodeKind::Modifier,
             ..Default::default()
         }),
         Keycode::KC_DOWN => Some(KeycodeLabel {
-            long: Some("⬇".to_string()),
+            long: None,
+            symbol: Some(egui_phosphor::regular::ARROW_DOWN.to_string()),
             kind: KeycodeKind::Modifier,
             ..Default::default()
         }),
         Keycode::KC_UP => Some(KeycodeLabel {
-            long: Some("⬆".to_string()),
+            long: None,
+            symbol: Some(egui_phosphor::regular::ARROW_UP.to_string()),
             kind: KeycodeKind::Modifier,
             ..Default::default()
         }),
@@ -425,11 +432,12 @@ pub fn get_basic_keycode_label(keycode_bytes: u16) -> Option<KeycodeLabel> {
         }),
         Keycode::KC_APPLICATION => Some(KeycodeLabel {
             long: Some("Menu".to_string()),
+            symbol: Some(egui_phosphor::regular::LIST.to_string()),
             ..Default::default()
         }),
         Keycode::KC_KB_POWER => Some(KeycodeLabel {
             long: Some("Power".to_string()),
-            short: Some("Pwr".to_string()),
+            symbol: Some(egui_phosphor::regular::POWER.to_string()),
             ..Default::default()
         }),
         Keycode::KC_KP_EQUAL => Some(KeycodeLabel {
@@ -529,17 +537,15 @@ pub fn get_basic_keycode_label(keycode_bytes: u16) -> Option<KeycodeLabel> {
             ..Default::default()
         }),
         Keycode::KC_KB_MUTE => Some(KeycodeLabel {
-            long: Some("Mute".to_string()),
+            symbol: Some(egui_phosphor::regular::SPEAKER_X.to_string()),
             ..Default::default()
         }),
         Keycode::KC_KB_VOLUME_UP => Some(KeycodeLabel {
-            long: Some("Vol +".to_string()),
-            short: Some("Vol+".to_string()),
+            symbol: Some(egui_phosphor::regular::SPEAKER_HIGH.to_string()),
             ..Default::default()
         }),
         Keycode::KC_KB_VOLUME_DOWN => Some(KeycodeLabel {
-            long: Some("Vol -".to_string()),
-            short: Some("Vol-".to_string()),
+            symbol: Some(egui_phosphor::regular::SPEAKER_LOW.to_string()),
             ..Default::default()
         }),
         Keycode::KC_LOCKING_CAPS_LOCK => Some(KeycodeLabel {
@@ -698,33 +704,31 @@ pub fn get_basic_keycode_label(keycode_bytes: u16) -> Option<KeycodeLabel> {
             ..Default::default()
         }),
         Keycode::KC_AUDIO_MUTE => Some(KeycodeLabel {
-            long: Some("Mute".to_string()),
+            symbol: Some(egui_phosphor::regular::SPEAKER_X.to_string()),
             ..Default::default()
         }),
         Keycode::KC_AUDIO_VOL_UP => Some(KeycodeLabel {
-            long: Some("Vol +".to_string()),
+            symbol: Some(egui_phosphor::regular::SPEAKER_HIGH.to_string()),
             ..Default::default()
         }),
         Keycode::KC_AUDIO_VOL_DOWN => Some(KeycodeLabel {
-            long: Some("Vol -".to_string()),
+            symbol: Some(egui_phosphor::regular::SPEAKER_LOW.to_string()),
             ..Default::default()
         }),
         Keycode::KC_MEDIA_NEXT_TRACK => Some(KeycodeLabel {
-            long: Some("Next".to_string()),
+            symbol: Some(egui_phosphor::regular::SKIP_FORWARD.to_string()),
             ..Default::default()
         }),
         Keycode::KC_MEDIA_PREV_TRACK => Some(KeycodeLabel {
-            long: Some("Previous".to_string()),
-            short: Some("Prev".to_string()),
+            symbol: Some(egui_phosphor::regular::SKIP_BACK.to_string()),
             ..Default::default()
         }),
         Keycode::KC_MEDIA_STOP => Some(KeycodeLabel {
-            long: Some("Media Stop".to_string()),
-            short: Some("Stop".to_string()),
+            symbol: Some(egui_phosphor::regular::STOP.to_string()),
             ..Default::default()
         }),
         Keycode::KC_MEDIA_PLAY_PAUSE => Some(KeycodeLabel {
-            long: Some("Play".to_string()),
+            symbol: Some(egui_phosphor::regular::PLAY_PAUSE.to_string()),
             ..Default::default()
         }),
         Keycode::KC_MEDIA_SELECT => Some(KeycodeLabel {
@@ -778,23 +782,19 @@ pub fn get_basic_keycode_label(keycode_bytes: u16) -> Option<KeycodeLabel> {
             ..Default::default()
         }),
         Keycode::KC_MEDIA_FAST_FORWARD => Some(KeycodeLabel {
-            long: Some("Fast Forward".to_string()),
-            short: Some("FF".to_string()),
+            symbol: Some(egui_phosphor::regular::FAST_FORWARD.to_string()),
             ..Default::default()
         }),
         Keycode::KC_MEDIA_REWIND => Some(KeycodeLabel {
-            long: Some("Rewind".to_string()),
-            short: Some("Rwd".to_string()),
+            symbol: Some(egui_phosphor::regular::REWIND.to_string()),
             ..Default::default()
         }),
         Keycode::KC_BRIGHTNESS_UP => Some(KeycodeLabel {
-            long: Some("Screen +".to_string()),
-            short: Some("Scr +".to_string()),
+            symbol: Some(egui_phosphor::regular::SUN.to_string()),
             ..Default::default()
         }),
         Keycode::KC_BRIGHTNESS_DOWN => Some(KeycodeLabel {
-            long: Some("Screen -".to_string()),
-            short: Some("Scr -".to_string()),
+            symbol: Some(egui_phosphor::regular::SUN_DIM.to_string()),
             ..Default::default()
         }),
         Keycode::KC_CONTROL_PANEL => Some(KeycodeLabel {
@@ -894,50 +894,46 @@ pub fn get_basic_keycode_label(keycode_bytes: u16) -> Option<KeycodeLabel> {
             ..Default::default()
         }),
         Keycode::KC_LEFT_CTRL => Some(KeycodeLabel {
-            long: Some("Left Ctrl".to_string()),
-            short: Some("LCtrl".to_string()),
+            long: Some("Ctrl".to_string()),
             kind: KeycodeKind::Modifier,
             ..Default::default()
         }),
         Keycode::KC_LEFT_SHIFT => Some(KeycodeLabel {
-            long: Some("Left Shift".to_string()),
-            short: Some("LShft".to_string()),
+            long: Some("Shift".to_string()),
+            symbol: Some(egui_phosphor::regular::ARROW_FAT_UP.to_string()),
             kind: KeycodeKind::Modifier,
             ..Default::default()
         }),
         Keycode::KC_LEFT_ALT => Some(KeycodeLabel {
-            long: Some("Left Alt".to_string()),
-            short: Some("LAlt".to_string()),
+            long: Some("Alt".to_string()),
             kind: KeycodeKind::Modifier,
             ..Default::default()
         }),
         Keycode::KC_LEFT_GUI => Some(KeycodeLabel {
-            long: Some("Left Win".to_string()),
-            short: Some("LWin".to_string()),
+            long: Some("Win".to_string()),
+            symbol: Some(egui_phosphor::regular::WINDOWS_LOGO.to_string()),
             kind: KeycodeKind::Modifier,
             ..Default::default()
         }),
         Keycode::KC_RIGHT_CTRL => Some(KeycodeLabel {
-            long: Some("Right Ctrl".to_string()),
-            short: Some("RCtrl".to_string()),
+            long: Some("Ctrl".to_string()),
             kind: KeycodeKind::Modifier,
             ..Default::default()
         }),
         Keycode::KC_RIGHT_SHIFT => Some(KeycodeLabel {
-            long: Some("Right Shift".to_string()),
-            short: Some("RShft".to_string()),
+            long: Some("Shift".to_string()),
+            symbol: Some(egui_phosphor::regular::ARROW_FAT_UP.to_string()),
             kind: KeycodeKind::Modifier,
             ..Default::default()
         }),
         Keycode::KC_RIGHT_ALT => Some(KeycodeLabel {
-            long: Some("Right Alt".to_string()),
-            short: Some("RAlt".to_string()),
+            long: Some("Alt".to_string()),
             kind: KeycodeKind::Modifier,
             ..Default::default()
         }),
         Keycode::KC_RIGHT_GUI => Some(KeycodeLabel {
-            long: Some("Right Win".to_string()),
-            short: Some("RWin".to_string()),
+            long: Some("Win".to_string()),
+            symbol: Some(egui_phosphor::regular::WINDOWS_LOGO.to_string()),
             kind: KeycodeKind::Modifier,
             ..Default::default()
         }),

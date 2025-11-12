@@ -5,6 +5,11 @@ use crate::keycode_labels::{self, KeycodeKind, KeycodeLabel};
 use eframe::egui::{self, Align2, Window};
 use std::time::Instant;
 
+struct LabelGalleys {
+    symbol: Option<std::sync::Arc<egui::Galley>>,
+    text: Option<std::sync::Arc<egui::Galley>>,
+}
+
 pub struct Overlay {
     keyboard: Keyboard,
     size: f32,
@@ -22,30 +27,76 @@ impl Overlay {
         }
     }
 
-    fn generate_key_label_galley(
+    fn generate_key_label_galleys(
         &self,
         ui: &egui::Ui,
         keycode_label: KeycodeLabel,
         rect: egui::Rect,
         font: egui::FontId,
         color: egui::Color32,
-    ) -> Option<std::sync::Arc<egui::Galley>> {
-        let create_galley = |text: String| ui.painter().layout_no_wrap(text, font.clone(), color);
-        let galley_fits =
-            |galley: &std::sync::Arc<egui::Galley>| galley.rect.width() <= rect.width() * 0.85;
+    ) -> LabelGalleys {
+        let create_galley =
+            |text: String, fid: egui::FontId| ui.painter().layout_no_wrap(text, fid, color);
+        let fits_width =
+            |galley: &std::sync::Arc<egui::Galley>, max: f32| galley.rect.width() <= max;
+        let max_width = rect.width() * 0.85;
 
-        let long_label = keycode_label.long.unwrap_or_default();
+        if let Some(symbol) = keycode_label.symbol {
+            let symbol_font = egui::FontId::proportional(0.33 * self.size);
+            let symbol_galley = create_galley(symbol, symbol_font);
 
-        let full_galley = create_galley(long_label.clone());
-        if galley_fits(&full_galley) {
-            return Some(full_galley);
+            // Try to fit symbol + long label
+            if let Some(long) = keycode_label.long {
+                let text_galley = create_galley(long, font.clone());
+                let gap = 0.06 * self.size;
+                let total_width = symbol_galley.rect.width() + gap + text_galley.rect.width();
+                if total_width <= max_width {
+                    return LabelGalleys {
+                        symbol: Some(symbol_galley),
+                        text: Some(text_galley),
+                    };
+                }
+            }
+
+            // Try to fit symbol + short label
+            if let Some(short) = keycode_label.short {
+                let text_galley = create_galley(short, font.clone());
+                let gap = 0.06 * self.size;
+                let total_width = symbol_galley.rect.width() + gap + text_galley.rect.width();
+                if total_width <= max_width {
+                    return LabelGalleys {
+                        symbol: Some(symbol_galley),
+                        text: Some(text_galley),
+                    };
+                }
+            }
+
+            // Symbol only
+            return LabelGalleys {
+                symbol: Some(symbol_galley),
+                text: None,
+            };
         }
 
+        // Try fitting long label
+        let long_label = keycode_label.long.unwrap_or_default();
+        let full_galley = create_galley(long_label.clone(), font.clone());
+        if fits_width(&full_galley, max_width) {
+            return LabelGalleys {
+                symbol: None,
+                text: Some(full_galley),
+            };
+        }
+
+        // Try fitting short label or truncated long label
         let mut truncated = if keycode_label.short.is_some() {
             let short_label = keycode_label.short.unwrap_or_default();
-            let short_galley = create_galley(short_label.clone());
-            if galley_fits(&short_galley) {
-                return Some(short_galley);
+            let short_galley = create_galley(short_label.clone(), font.clone());
+            if fits_width(&short_galley, max_width) {
+                return LabelGalleys {
+                    symbol: None,
+                    text: Some(short_galley),
+                };
             }
             short_label
         } else {
@@ -55,13 +106,19 @@ impl Overlay {
         while truncated.len() > 1 {
             truncated.pop();
             let truncated_with_ellipsis = format!("{}...", truncated);
-            let truncated_galley = create_galley(truncated_with_ellipsis);
-            if galley_fits(&truncated_galley) {
-                return Some(truncated_galley);
+            let truncated_galley = create_galley(truncated_with_ellipsis, font.clone());
+            if fits_width(&truncated_galley, max_width) {
+                return LabelGalleys {
+                    symbol: None,
+                    text: Some(truncated_galley),
+                };
             }
         }
 
-        None
+        LabelGalleys {
+            symbol: None,
+            text: None,
+        }
     }
 
     fn get_anchor_params(&self) -> (Align2, egui::Vec2) {
@@ -208,13 +265,51 @@ impl eframe::App for Overlay {
                         egui::StrokeKind::Outside,
                     );
 
-                    // Draw key label
+                    // Draw key label and optional symbol
                     let font = egui::FontId::proportional(0.25 * self.size);
-                    if let Some(label_galley) =
-                        self.generate_key_label_galley(ui, keycode_label, rect, font, font_color)
-                    {
-                        let label_pos = rect.center() - label_galley.rect.center().to_vec2();
-                        ui.painter().galley(label_pos, label_galley, font_color);
+                    match self.generate_key_label_galleys(
+                        ui,
+                        keycode_label,
+                        rect,
+                        font.clone(),
+                        font_color,
+                    ) {
+                        LabelGalleys {
+                            symbol: Some(symbol_galley),
+                            text: Some(text_galley),
+                        } => {
+                            let gap = 0.06 * self.size;
+                            let total_width =
+                                symbol_galley.rect.width() + gap + text_galley.rect.width();
+                            let start_x = rect.center().x - total_width * 0.5;
+
+                            let text_pos_x = start_x + gap + symbol_galley.rect.width();
+                            let text_pos = egui::pos2(
+                                text_pos_x,
+                                rect.center().y - text_galley.rect.center().y,
+                            );
+                            let sym_pos = egui::pos2(
+                                start_x,
+                                rect.center().y - symbol_galley.rect.center().y,
+                            );
+                            ui.painter().galley(sym_pos, symbol_galley, font_color);
+                            ui.painter().galley(text_pos, text_galley, font_color);
+                        }
+                        LabelGalleys {
+                            symbol: Some(symbol_galley),
+                            text: None,
+                        } => {
+                            let sym_pos = rect.center() - symbol_galley.rect.center().to_vec2();
+                            ui.painter().galley(sym_pos, symbol_galley, font_color);
+                        }
+                        LabelGalleys {
+                            symbol: None,
+                            text: Some(text_galley),
+                        } => {
+                            let label_pos = rect.center() - text_galley.rect.center().to_vec2();
+                            ui.painter().galley(label_pos, text_galley, font_color);
+                        }
+                        _ => {}
                     }
                 }
             });

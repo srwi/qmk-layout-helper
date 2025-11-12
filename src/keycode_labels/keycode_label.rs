@@ -12,6 +12,7 @@ pub enum KeycodeKind {
 pub struct KeycodeLabel {
     pub long: Option<String>,
     pub short: Option<String>,
+    pub symbol: Option<String>,
     pub kind: KeycodeKind,
     pub layer_ref: Option<u8>,
 }
@@ -19,8 +20,9 @@ pub struct KeycodeLabel {
 impl Default for KeycodeLabel {
     fn default() -> Self {
         KeycodeLabel {
-            long: Some("n/a".to_string()),
+            long: None,
             short: None,
+            symbol: None,
             kind: KeycodeKind::Basic,
             layer_ref: None,
         }
