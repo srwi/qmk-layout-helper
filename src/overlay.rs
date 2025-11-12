@@ -165,7 +165,7 @@ impl eframe::App for Overlay {
                     );
 
                     // Draw key label
-                    let font = egui::FontId::proportional(0.28 * self.size);
+                    let font = egui::FontId::proportional(0.25 * self.size);
                     if let Some(label_galley) =
                         self.generate_key_label_galley(ui, keycode_label, rect, font, font_color)
                     {

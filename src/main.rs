@@ -1,3 +1,4 @@
+mod basic_keycode_label;
 mod cli;
 mod keyboard;
 mod keyboard_layout;

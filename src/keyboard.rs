@@ -18,6 +18,21 @@ impl Keyboard {
         let api = api::KeyboardApi::new(keyboard_info.vid, keyboard_info.pid, 0xff60)
             .expect("Failed to connect to device.");
 
+        let protocol_version = api
+            .get_protocol_version()
+            .expect("Failed to get protocol version");
+        if protocol_version < 12 {
+            panic!(
+                "Unsupported protocol version: {}. Minimum required version is 12.",
+                protocol_version
+            );
+        } else if protocol_version > 12 {
+            eprintln!(
+                "Warning: Protocol version {} is newer than the supported version 12. Some features may not work as expected.",
+                protocol_version
+            );
+        }
+
         let layers = api.get_layer_count().expect("Failed to get layer count") as usize;
 
         let matrix =
