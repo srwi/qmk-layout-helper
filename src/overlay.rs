@@ -1,7 +1,6 @@
 use crate::cli::WindowPosition;
 use crate::keyboard::Keyboard;
-use crate::keycode_label;
-use crate::keycode_label::KeycodeLabel;
+use crate::keycode_labels::{self, KeycodeKind, KeycodeLabel};
 
 use eframe::egui::{self, Align2, Window};
 use std::time::Instant;
@@ -14,13 +13,7 @@ pub struct Overlay {
 }
 
 impl Overlay {
-    pub fn new(
-        keyboard: Keyboard,
-        _ctx: egui::Context,
-        size: i32,
-        margin: u32,
-        position: WindowPosition,
-    ) -> Self {
+    pub fn new(keyboard: Keyboard, size: i32, margin: u32, position: WindowPosition) -> Self {
         Self {
             keyboard,
             margin,
@@ -96,6 +89,57 @@ impl Overlay {
             WindowPosition::Top => (Align2::CENTER_TOP, egui::vec2(0.0, self.margin as f32)),
         }
     }
+
+    pub fn get_keycode_color(
+        &self,
+        layer: u8,
+        kind: KeycodeKind,
+        desaturate: bool,
+    ) -> (egui::Color32, egui::Color32, egui::Color32) {
+        const ALPHA: u8 = 239;
+        const DESATURATE_FACTOR: f32 = 0.7;
+
+        const BLACK: egui::Color32 = egui::Color32::from_rgba_premultiplied(0, 0, 0, ALPHA);
+        const LAYER_0: egui::Color32 = egui::Color32::from_rgba_premultiplied(83, 83, 83, ALPHA);
+        const LAYER_1: egui::Color32 = egui::Color32::from_rgba_premultiplied(80, 140, 115, ALPHA);
+        const LAYER_2: egui::Color32 = egui::Color32::from_rgba_premultiplied(100, 115, 150, ALPHA);
+        const LAYER_3: egui::Color32 = egui::Color32::from_rgba_premultiplied(140, 110, 150, ALPHA);
+        const LAYER_4: egui::Color32 = egui::Color32::from_rgba_premultiplied(95, 121, 127, ALPHA);
+        const LAYER_5: egui::Color32 = egui::Color32::from_rgba_premultiplied(147, 137, 110, ALPHA);
+        const LAYER_N: egui::Color32 = egui::Color32::from_rgba_premultiplied(127, 127, 127, ALPHA);
+
+        let mut background_color = match layer {
+            0 => LAYER_0,
+            1 => LAYER_1,
+            2 => LAYER_2,
+            3 => LAYER_3,
+            4 => LAYER_4,
+            5 => LAYER_5,
+            _ => LAYER_N,
+        };
+
+        if kind == KeycodeKind::Special {
+            background_color = background_color.lerp_to_gamma(BLACK, 0.6);
+        } else if kind == KeycodeKind::Modifier {
+            background_color = background_color.lerp_to_gamma(BLACK, 0.3);
+        }
+
+        let mut border_color = background_color.lerp_to_gamma(BLACK, 0.2);
+
+        // Never desaturate layer 0
+        if desaturate && layer != 0 {
+            background_color = background_color.lerp_to_gamma(LAYER_0, DESATURATE_FACTOR);
+            border_color = border_color.lerp_to_gamma(LAYER_0, DESATURATE_FACTOR);
+        }
+
+        let font_color = if desaturate {
+            egui::Color32::WHITE.gamma_multiply(1.0 - DESATURATE_FACTOR)
+        } else {
+            egui::Color32::WHITE
+        };
+
+        (background_color, border_color, font_color)
+    }
 }
 
 impl eframe::App for Overlay {
@@ -137,14 +181,14 @@ impl eframe::App for Overlay {
 
                     let bytes = self.keyboard.matrix[effective_layer as usize][key.row as usize]
                         [key.col as usize];
-                    let keycode_label = keycode_label::get_keycode_label(bytes);
+                    let keycode_label = keycode_labels::get_keycode_label(bytes);
 
                     let first_layer_bytes =
                         self.keyboard.matrix[0][key.row as usize][key.col as usize];
                     let first_layer_keycode_kind =
-                        keycode_label::get_keycode_label(first_layer_bytes).kind;
+                        keycode_labels::get_keycode_label(first_layer_bytes).kind;
 
-                    let (fill_color, stroke_color, font_color) = keycode_label::get_keycode_color(
+                    let (fill_color, stroke_color, font_color) = self.get_keycode_color(
                         keycode_label.layer_ref.unwrap_or(effective_layer),
                         first_layer_keycode_kind,
                         is_background_key,

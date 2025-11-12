@@ -1,8 +1,7 @@
-mod basic_keycode_label;
 mod cli;
 mod keyboard;
 mod keyboard_layout;
-mod keycode_label;
+mod keycode_labels;
 mod overlay;
 mod tray;
 
@@ -23,7 +22,7 @@ fn main() -> Result<(), eframe::Error> {
     let layout_name = &cli.layout_name;
 
     let keyboard_info =
-        KeyboardInfo::new(&keyboard_config, &layout_name).expect("Failed to read keyboard layout.");
+        KeyboardInfo::new(keyboard_config, layout_name).expect("Failed to read keyboard layout.");
     let keyboard = Keyboard::new(keyboard_info, cli.timeout);
 
     let options = eframe::NativeOptions {
@@ -38,10 +37,9 @@ fn main() -> Result<(), eframe::Error> {
     eframe::run_native(
         "QMK Layout Helper",
         options,
-        Box::new(move |cc| {
+        Box::new(|_| {
             Ok(Box::new(Overlay::new(
                 keyboard,
-                cc.egui_ctx.clone(),
                 cli.size,
                 cli.margin,
                 cli.position,

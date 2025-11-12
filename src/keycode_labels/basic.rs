@@ -1,5 +1,5 @@
-use crate::keycode_label::KeycodeKind;
-use crate::keycode_label::KeycodeLabel;
+use crate::keycode_labels::keycode_label::{KeycodeKind, KeycodeLabel};
+
 use qmk_via_api::keycodes::Keycode;
 
 pub fn get_basic_keycode_label(keycode_bytes: u16) -> Option<KeycodeLabel> {
