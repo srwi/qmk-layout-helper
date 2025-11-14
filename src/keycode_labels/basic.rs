@@ -235,7 +235,7 @@ pub fn get_basic_keycode_label(keycode_bytes: u16) -> Option<KeycodeLabel> {
             ..Default::default()
         }),
         Keycode::KC_CAPS_LOCK => Some(KeycodeLabel {
-            long: Some("Caps Lock".to_string()),
+            long: Some("Capslock".to_string()),
             short: Some("Caps".to_string()),
             symbol: Some(egui_phosphor::regular::ARROW_FAT_LINE_UP.to_string()),
             kind: KeycodeKind::Modifier,

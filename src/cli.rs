@@ -1,7 +1,7 @@
 use clap::Parser;
 use std::path::PathBuf;
 
-#[derive(clap::ValueEnum, Clone)]
+#[derive(clap::ValueEnum, Clone, PartialEq, Eq, Debug)]
 pub enum WindowPosition {
     TopLeft,
     TopRight,
