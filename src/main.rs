@@ -1,38 +1,37 @@
 #![cfg_attr(target_os = "windows", windows_subsystem = "windows")]
 
-mod cli;
 mod keyboard;
 mod keyboard_layout;
 mod keycode_labels;
-mod overlay;
+mod overlay_window;
 mod settings;
+mod settings_window;
 mod tray;
 
-use clap::Parser;
 use eframe::egui;
-
-use cli::Cli;
 use keyboard::Keyboard;
 use keyboard_layout::KeyboardInfo;
-use overlay::Overlay;
-use settings::{Settings, SettingsApp};
+use overlay_window::Overlay;
+use settings::Settings;
+use settings_window::SettingsApp;
 use std::sync::{Arc, Mutex};
 
 fn main() -> Result<(), eframe::Error> {
-    let _tray_icon = tray::create_tray_icon();
+    const SETTINGS_FILE: &str = "settings.ini";
 
-    let settings: Settings = if std::env::args_os().len() <= 1 {
-        let settings = Arc::new(Mutex::new(Settings::default()));
+    let settings: Settings = if let Some(loaded) = Settings::load_from_file(SETTINGS_FILE) {
+        loaded
+    } else {
+        let shared = Arc::new(Mutex::new(Settings::default()));
         let options = eframe::NativeOptions {
             run_and_return: true,
             viewport: egui::ViewportBuilder::default()
                 .with_decorations(true)
-                .with_inner_size([520.0, 260.0]),
+                .with_inner_size([250.0, 350.0]),
             ..Default::default()
         };
-
         eframe::run_native("QMK Layout Helper – Settings", options, {
-            let shared_settings = settings.clone();
+            let shared_settings = shared.clone();
             Box::new(move |cc| {
                 let mut fonts = egui::FontDefinitions::default();
                 egui_phosphor::add_to_fonts(&mut fonts, egui_phosphor::Variant::Regular);
@@ -40,20 +39,23 @@ fn main() -> Result<(), eframe::Error> {
                 Ok(Box::new(SettingsApp::new(shared_settings)))
             })
         })?;
-
-        let s = settings.lock().unwrap().clone();
-        if s.confirmed {
-            s
-        } else {
+        let settings = shared.lock().unwrap().clone();
+        if !settings.confirmed {
             return Ok(());
         }
-    } else {
-        Settings::from(Cli::parse())
+        if settings.save_settings {
+            if let Err(e) = settings.save_to_file(SETTINGS_FILE) {
+                eprintln!("Failed to save settings: {e}");
+            }
+        }
+        settings
     };
 
     let keyboard_info = KeyboardInfo::new(&settings.keyboard_config_path, &settings.layout_name)
         .expect("Failed to read keyboard layout.");
     let keyboard = Keyboard::new(keyboard_info, settings.timeout);
+
+    let _tray_icon = tray::create_tray_icon();
 
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()

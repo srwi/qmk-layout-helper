@@ -1,6 +1,6 @@
-use crate::cli::WindowPosition;
 use crate::keyboard::Keyboard;
 use crate::keycode_labels::{self, KeycodeKind, KeycodeLabel};
+use crate::settings::WindowPosition;
 
 use eframe::egui::{self, Align2, Window};
 use std::time::Instant;
