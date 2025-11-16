@@ -27,10 +27,12 @@ fn main() -> Result<(), eframe::Error> {
             run_and_return: true,
             viewport: egui::ViewportBuilder::default()
                 .with_decorations(true)
-                .with_inner_size([250.0, 350.0]),
+                .with_inner_size([480.0, 510.0])
+                .with_resizable(false)
+                .with_maximize_button(false),
             ..Default::default()
         };
-        eframe::run_native("QMK Layout Helper – Settings", options, {
+        eframe::run_native("QMK Layout Helper", options, {
             let shared_settings = shared.clone();
             Box::new(move |cc| {
                 let mut fonts = egui::FontDefinitions::default();
