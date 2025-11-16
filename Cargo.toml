@@ -12,9 +12,10 @@ edition = "2021"
 rust-ini = "0.21.3"
 tray-icon = "0.21.2"
 eframe = "0.32.0"
+egui_extras = { version = "0.32.0", features = ["all_loaders"] }
 qmk-via-api = { version = "0.5.0", default-features = false }
 serde_json = "1.0.145"
 serde = { version = "1.0.228", features = ["derive"] }
 winit = "0.30.12"
-image = "0.25.6"
+image = "0.25.9"
 egui-phosphor = "0.10"

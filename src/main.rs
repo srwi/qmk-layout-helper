@@ -35,9 +35,12 @@ fn main() -> Result<(), eframe::Error> {
         eframe::run_native("QMK Layout Helper", options, {
             let shared_settings = shared.clone();
             Box::new(move |cc| {
+                egui_extras::install_image_loaders(&cc.egui_ctx);
+
                 let mut fonts = egui::FontDefinitions::default();
                 egui_phosphor::add_to_fonts(&mut fonts, egui_phosphor::Variant::Regular);
                 cc.egui_ctx.set_fonts(fonts);
+
                 Ok(Box::new(SettingsApp::new(shared_settings)))
             })
         })?;

@@ -8,7 +8,6 @@ pub struct SettingsApp {
     current: Settings,
     shared: Arc<Mutex<Settings>>,
     error: Option<String>,
-    icon_texture: Option<egui::TextureHandle>,
 }
 
 impl SettingsApp {
@@ -18,7 +17,6 @@ impl SettingsApp {
             current,
             shared,
             error: None,
-            icon_texture: None,
         }
     }
 }
@@ -27,29 +25,16 @@ impl eframe::App for SettingsApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         egui::CentralPanel::default()
             .frame(egui::Frame {
-                inner_margin: egui::Margin::same(40),
+                inner_margin: egui::Margin::symmetric(30, 25),
                 fill: ctx.style().visuals.window_fill,
                 ..Default::default()
             })
             .show(ctx, |ui| {
-                if self.icon_texture.is_none() {
-                    if let Ok(dynamic) =
-                        image::load_from_memory(include_bytes!("../resources/icon.ico"))
-                    {
-                        let rgba = dynamic.to_rgba8();
-                        let [w, h] = [rgba.width() as usize, rgba.height() as usize];
-                        let pixels = rgba.into_vec();
-                        let color_image = egui::ColorImage::from_rgba_unmultiplied([w, h], &pixels);
-                        let texture =
-                            ctx.load_texture("app_icon", color_image, egui::TextureOptions::LINEAR);
-                        self.icon_texture = Some(texture);
-                    }
-                }
-
                 ui.with_layout(egui::Layout::top_down(egui::Align::Center), |ui| {
-                    if let Some(tex) = &self.icon_texture {
-                        ui.image((tex.id(), egui::vec2(96.0, 96.0)));
-                    }
+                    ui.add(
+                        egui::Image::new(egui::include_image!("../resources/icon.png"))
+                            .max_width(120.0),
+                    );
                     ui.add_space(10.0);
                     ui.heading("QMK Layout Helper");
                     ui.hyperlink_to(
