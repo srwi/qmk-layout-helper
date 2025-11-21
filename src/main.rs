@@ -1,7 +1,7 @@
 #![cfg_attr(target_os = "windows", windows_subsystem = "windows")]
 
 mod keyboard;
-mod keyboard_layout;
+mod keyboard_info;
 mod keycode_labels;
 mod overlay_window;
 mod settings;
@@ -10,7 +10,7 @@ mod tray;
 
 use eframe::egui;
 use keyboard::Keyboard;
-use keyboard_layout::KeyboardInfo;
+use keyboard_info::KeyboardInfo;
 use overlay_window::Overlay;
 use settings::Settings;
 use settings_window::SettingsApp;
@@ -56,9 +56,9 @@ fn main() -> Result<(), eframe::Error> {
         settings
     };
 
-    let keyboard_info = KeyboardInfo::new(&settings.keyboard_config_path, &settings.layout_name)
-        .expect("Failed to read keyboard layout.");
-    let keyboard = Keyboard::new(keyboard_info, settings.timeout);
+    let keyboard_info =
+        KeyboardInfo::new(&settings.keyboard_config_path).expect("Failed to read keyboard layout.");
+    let keyboard = Keyboard::new(keyboard_info, settings.layout_name, settings.timeout);
 
     let _tray_icon = tray::create_tray_icon();
 

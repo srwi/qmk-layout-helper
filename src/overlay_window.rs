@@ -223,7 +223,7 @@ impl eframe::App for Overlay {
             .title_bar(false)
             .show(ctx, |ui| {
                 // Allow auto_sized window to shrink to fit content
-                let layout_size = self.keyboard.keyboard_info.get_dimensions();
+                let layout_size = self.keyboard.layout.get_dimensions();
                 ui.allocate_space(egui::vec2(
                     layout_size.0 * self.size,
                     layout_size.1 * self.size,
@@ -231,7 +231,7 @@ impl eframe::App for Overlay {
 
                 let window_pos = ui.min_rect().min;
 
-                for key in &self.keyboard.keyboard_info.keys {
+                for key in &self.keyboard.layout.keys {
                     let (effective_layer, is_background_key) = self
                         .keyboard
                         .get_effective_key_layer(key.row as usize, key.col as usize);

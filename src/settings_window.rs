@@ -1,13 +1,17 @@
-use eframe::egui::{self};
-use std::sync::{Arc, Mutex};
-
+use crate::keyboard::Keyboard;
+use crate::keyboard_info::KeyboardInfo;
 use crate::settings::Settings;
 use crate::settings::WindowPosition;
+
+use eframe::egui::{self};
+use std::path::Path;
+use std::sync::{Arc, Mutex};
 
 pub struct SettingsApp {
     current: Settings,
     shared: Arc<Mutex<Settings>>,
     error: Option<String>,
+    layout_names: Vec<String>,
 }
 
 impl SettingsApp {
@@ -17,6 +21,61 @@ impl SettingsApp {
             current,
             shared,
             error: None,
+            layout_names: Vec::new(),
+        }
+    }
+
+    fn file_button_label(&self) -> String {
+        let path_str = self.current.keyboard_config_path.trim();
+        if path_str.is_empty() {
+            "Open file…".to_string()
+        } else {
+            Path::new(path_str)
+                .file_name()
+                .and_then(|s| s.to_str())
+                .unwrap_or(path_str)
+                .to_string()
+        }
+    }
+
+    fn handle_picked_file(&mut self, picked: String) {
+        self.current.keyboard_config_path = picked;
+
+        let keyboard_info = match KeyboardInfo::new(&self.current.keyboard_config_path) {
+            Ok(info) => info,
+            Err(err) => {
+                self.error = Some(format!(
+                    "Failed to parse keyboard info from the selected JSON: {err}"
+                ));
+                return;
+            }
+        };
+
+        if let Err(err) = Keyboard::try_get_api(keyboard_info.vid, keyboard_info.pid) {
+            self.error = Some(format!(
+                "Failed to initialize keyboard from the selected JSON: {err}"
+            ));
+            return;
+        }
+
+        match keyboard_info.get_layout_names() {
+            Ok(names) => {
+                self.layout_names = names;
+                if let Some(first) = self.layout_names.first() {
+                    if !self
+                        .layout_names
+                        .iter()
+                        .any(|n| n == &self.current.layout_name)
+                    {
+                        self.current.layout_name = first.clone();
+                    }
+                }
+                self.error = None;
+            }
+            Err(err) => {
+                self.layout_names.clear();
+                self.error = Some(err.to_string());
+            }
         }
     }
 }
@@ -49,17 +108,39 @@ impl eframe::App for SettingsApp {
                         .spacing([25.0, 14.0])
                         .show(ui, |ui| {
                             ui.label("Keyboard info JSON");
-                            ui.add_sized(
-                                ui.available_size(),
-                                egui::TextEdit::singleline(&mut self.current.keyboard_config_path),
+                            ui.add_enabled_ui(
+                                self.current.keyboard_config_path.trim().is_empty(),
+                                |ui| {
+                                    if ui
+                                        .add_sized(
+                                            [ui.available_width(), 28.0],
+                                            egui::Button::new(self.file_button_label()),
+                                        )
+                                        .clicked()
+                                    {
+                                        if let Some(path) = rfd::FileDialog::new().pick_file() {
+                                            self.handle_picked_file(path.display().to_string());
+                                        }
+                                    };
+                                },
                             );
                             ui.end_row();
 
                             ui.label("Layout");
-                            ui.add_sized(
-                                ui.available_size(),
-                                egui::TextEdit::singleline(&mut self.current.layout_name),
-                            );
+                            ui.add_enabled_ui(!self.layout_names.is_empty(), |ui| {
+                                egui::ComboBox::from_id_salt("layout_combo")
+                                    .width(ui.available_width())
+                                    .selected_text(self.current.layout_name.as_str())
+                                    .show_ui(ui, |ui| {
+                                        for name in &self.layout_names {
+                                            ui.selectable_value(
+                                                &mut self.current.layout_name,
+                                                name.clone(),
+                                                name,
+                                            );
+                                        }
+                                    });
+                            });
                             ui.end_row();
 
                             let position_label = self.current.position.to_string();
@@ -121,29 +202,41 @@ impl eframe::App for SettingsApp {
                         ui.add_space(25.0);
                         ui.checkbox(&mut self.current.save_settings, "Remember settings");
                         ui.add_space(5.0);
-                        if ui
-                            .add_sized([90.0, 28.0], egui::Button::new("Start"))
-                            .clicked()
-                        {
-                            let path = self.current.keyboard_config_path.trim().to_string();
-                            if path.is_empty() {
-                                self.error = Some(
-                                    "Please provide the path to the keyboard info JSON.".into(),
-                                );
-                            } else if let Ok(mut settings) = self.shared.lock() {
-                                settings.keyboard_config_path = path;
-                                settings.layout_name = self.current.layout_name.clone();
-                                settings.size = self.current.size;
-                                settings.position = self.current.position;
-                                settings.timeout = self.current.timeout;
-                                settings.margin = self.current.margin;
-                                settings.confirmed = true;
-                                settings.save_settings = self.current.save_settings;
-                                ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+                        ui.add_enabled_ui(!self.current.keyboard_config_path.is_empty(), |ui| {
+                            if ui
+                                .add_sized([90.0, 28.0], egui::Button::new("Start"))
+                                .clicked()
+                            {
+                                if let Ok(mut settings) = self.shared.lock() {
+                                    settings.keyboard_config_path =
+                                        self.current.keyboard_config_path.trim().to_string();
+                                    settings.layout_name = self.current.layout_name.clone();
+                                    settings.size = self.current.size;
+                                    settings.position = self.current.position;
+                                    settings.timeout = self.current.timeout;
+                                    settings.margin = self.current.margin;
+                                    settings.confirmed = true;
+                                    settings.save_settings = self.current.save_settings;
+                                    ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+                                }
                             }
-                        }
+                        });
                     });
                 });
             });
+
+        if let Some(error_message) = self.error.clone() {
+            egui::Window::new("Error")
+                .collapsible(false)
+                .resizable(false)
+                .anchor(egui::Align2::CENTER_CENTER, [0.0, 0.0])
+                .show(ctx, |ui| {
+                    ui.label(error_message);
+                    ui.add_space(10.0);
+                    if ui.button("OK").clicked() {
+                        self.error = None;
+                    }
+                });
+        }
     }
 }

@@ -1,12 +1,13 @@
-use crate::keyboard_layout::KeyboardInfo;
 use qmk_via_api::api::{self};
 use qmk_via_api::keycodes::Keycode;
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::{Duration, Instant};
 
+use crate::keyboard_info::{KeyboardInfo, KeyboardLayout};
+
 pub struct Keyboard {
-    pub keyboard_info: KeyboardInfo,
+    pub layout: KeyboardLayout,
     pub matrix: Vec<Vec<Vec<u16>>>,
     pub time_to_hide_overlay: Arc<Mutex<Option<Instant>>>,
     layer_state: Arc<Mutex<u32>>,
@@ -14,24 +15,13 @@ pub struct Keyboard {
 }
 
 impl Keyboard {
-    pub fn new(keyboard_info: KeyboardInfo, timeout: u64) -> Self {
-        let api = api::KeyboardApi::new(keyboard_info.vid, keyboard_info.pid, 0xff60)
-            .expect("Failed to connect to device.");
+    pub fn new(keyboard_info: KeyboardInfo, layout_name: String, timeout: u64) -> Self {
+        let layout = keyboard_info
+            .get_layout(&layout_name)
+            .expect("Failed to get layout");
 
-        let protocol_version = api
-            .get_protocol_version()
-            .expect("Failed to get protocol version");
-        if protocol_version < 12 {
-            panic!(
-                "Unsupported protocol version: {}. Minimum required version is 12.",
-                protocol_version
-            );
-        } else if protocol_version > 12 {
-            eprintln!(
-                "Warning: Protocol version {} is newer than the supported version 12. Some features may not work as expected.",
-                protocol_version
-            );
-        }
+        let api = Self::try_get_api(keyboard_info.vid, keyboard_info.pid)
+            .expect("Failed to connect to keyboard.");
 
         let layers = api.get_layer_count().expect("Failed to get layer count") as usize;
 
@@ -43,7 +33,7 @@ impl Keyboard {
         let time_to_hide_overlay = Arc::new(Mutex::new(Some(Instant::now())));
 
         let keyboard = Keyboard {
-            keyboard_info,
+            layout,
             matrix,
             time_to_hide_overlay: Arc::clone(&time_to_hide_overlay),
             layer_state: Arc::clone(&layer_state),
@@ -113,7 +103,8 @@ impl Keyboard {
         let default_layer_state = *self.default_layer_state.lock().unwrap();
         let num_layers = self.matrix.len().min(32);
 
-        // Track if there is any active momentary layer above the effective layer (i.e, key should be shown as background key)
+        // Track if there is any active momentary layer above the effective layer
+        // (i.e, key should be shown as background key)
         let mut active_layer_above = false;
 
         for i in (1..num_layers).rev() {
@@ -129,5 +120,21 @@ impl Keyboard {
         }
 
         (0, active_layer_above)
+    }
+
+    pub fn try_get_api(vid: u16, pid: u16) -> Result<api::KeyboardApi, String> {
+        let api = api::KeyboardApi::new(vid, pid, 0xff60)
+            .map_err(|e| format!("Failed to connect to device ({vid:04x}:{pid:04x}): {e}"))?;
+
+        let protocol_version = api
+            .get_protocol_version()
+            .map_err(|e| format!("Failed to get protocol version: {e}"))?;
+        if protocol_version < 12 {
+            return Err(format!(
+                "Unsupported protocol version: {}. Minimum required version is 12.",
+                protocol_version
+            ));
+        }
+        Ok(api)
     }
 }
