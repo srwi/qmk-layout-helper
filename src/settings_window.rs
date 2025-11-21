@@ -84,23 +84,19 @@ impl eframe::App for SettingsApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         egui::CentralPanel::default()
             .frame(egui::Frame {
-                inner_margin: egui::Margin::symmetric(30, 25),
+                inner_margin: egui::Margin::symmetric(30, 20),
                 fill: ctx.style().visuals.window_fill,
                 ..Default::default()
             })
             .show(ctx, |ui| {
                 ui.with_layout(egui::Layout::top_down(egui::Align::Center), |ui| {
-                    ui.add(
-                        egui::Image::new(egui::include_image!("../resources/icon.png"))
-                            .max_width(120.0),
-                    );
-                    ui.add_space(10.0);
                     ui.heading("QMK Layout Helper");
                     ui.hyperlink_to(
                         format!("Version {}", env!("CARGO_PKG_VERSION")),
                         "https://github.com/srwi/qmk-layout-helper",
                     );
-                    ui.add_space(25.0);
+
+                    ui.add_space(20.0);
 
                     egui::Grid::new("settings_grid")
                         .num_columns(2)
@@ -113,7 +109,7 @@ impl eframe::App for SettingsApp {
                                 |ui| {
                                     if ui
                                         .add_sized(
-                                            [ui.available_width(), 28.0],
+                                            ui.available_size(),
                                             egui::Button::new(self.file_button_label()),
                                         )
                                         .clicked()
@@ -197,30 +193,27 @@ impl eframe::App for SettingsApp {
                             );
                             ui.end_row();
                         });
-
-                    ui.with_layout(egui::Layout::top_down(egui::Align::Center), |ui| {
-                        ui.add_space(25.0);
-                        ui.checkbox(&mut self.current.save_settings, "Remember settings");
-                        ui.add_space(5.0);
-                        ui.add_enabled_ui(!self.current.keyboard_config_path.is_empty(), |ui| {
-                            if ui
-                                .add_sized([90.0, 28.0], egui::Button::new("Start"))
-                                .clicked()
-                            {
-                                if let Ok(mut settings) = self.shared.lock() {
-                                    settings.keyboard_config_path =
-                                        self.current.keyboard_config_path.trim().to_string();
-                                    settings.layout_name = self.current.layout_name.clone();
-                                    settings.size = self.current.size;
-                                    settings.position = self.current.position;
-                                    settings.timeout = self.current.timeout;
-                                    settings.margin = self.current.margin;
-                                    settings.confirmed = true;
-                                    settings.save_settings = self.current.save_settings;
-                                    ctx.send_viewport_cmd(egui::ViewportCommand::Close);
-                                }
+                    ui.add_space(20.0);
+                    ui.checkbox(&mut self.current.save_settings, "Remember settings");
+                    ui.add_space(5.0);
+                    ui.add_enabled_ui(!self.current.keyboard_config_path.is_empty(), |ui| {
+                        if ui
+                            .add_sized([90.0, 28.0], egui::Button::new("Start"))
+                            .clicked()
+                        {
+                            if let Ok(mut settings) = self.shared.lock() {
+                                settings.keyboard_config_path =
+                                    self.current.keyboard_config_path.trim().to_string();
+                                settings.layout_name = self.current.layout_name.clone();
+                                settings.size = self.current.size;
+                                settings.position = self.current.position;
+                                settings.timeout = self.current.timeout;
+                                settings.margin = self.current.margin;
+                                settings.confirmed = true;
+                                settings.save_settings = self.current.save_settings;
+                                ctx.send_viewport_cmd(egui::ViewportCommand::Close);
                             }
-                        });
+                        }
                     });
                 });
             });

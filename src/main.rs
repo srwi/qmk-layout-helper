@@ -8,7 +8,7 @@ mod settings;
 mod settings_window;
 mod tray;
 
-use eframe::egui;
+use eframe::egui::{self, IconData};
 use keyboard::Keyboard;
 use keyboard_info::KeyboardInfo;
 use overlay_window::Overlay;
@@ -23,13 +23,25 @@ fn main() -> Result<(), eframe::Error> {
         loaded
     } else {
         let shared = Arc::new(Mutex::new(Settings::default()));
+        let icon = {
+            let image = image::load_from_memory(include_bytes!("../resources/icon.ico"))
+                .expect("Failed to load icon")
+                .into_rgba8();
+            let (width, height) = image.dimensions();
+            IconData {
+                width: width,
+                height: height,
+                rgba: image.into_raw(),
+            }
+        };
         let options = eframe::NativeOptions {
             run_and_return: true,
             viewport: egui::ViewportBuilder::default()
                 .with_decorations(true)
-                .with_inner_size([480.0, 510.0])
+                .with_inner_size([480.0, 360.0])
                 .with_resizable(false)
-                .with_maximize_button(false),
+                .with_maximize_button(false)
+                .with_icon(icon),
             ..Default::default()
         };
         eframe::run_native("QMK Layout Helper", options, {
