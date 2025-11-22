@@ -152,7 +152,8 @@ impl Overlay {
         layer: u8,
         kind: KeycodeKind,
         desaturate: bool,
-    ) -> (egui::Color32, egui::Color32, egui::Color32) {
+        pressed: bool,
+    ) -> (egui::Color32, egui::Color32, f32, egui::Color32) {
         const ALPHA: u8 = 239;
         const DESATURATE_FACTOR: f32 = 0.7;
 
@@ -175,6 +176,15 @@ impl Overlay {
             _ => LAYER_N,
         };
 
+        if pressed {
+            return (
+                background_color.lerp_to_gamma(egui::Color32::WHITE, 0.2),
+                background_color.lerp_to_gamma(egui::Color32::WHITE, 0.7),
+                0.03 * self.size,
+                egui::Color32::WHITE,
+            );
+        }
+
         if kind == KeycodeKind::Special {
             background_color = background_color.lerp_to_gamma(BLACK, 0.6);
         } else if kind == KeycodeKind::Modifier {
@@ -195,7 +205,7 @@ impl Overlay {
             egui::Color32::WHITE
         };
 
-        (background_color, border_color, font_color)
+        (background_color, border_color, 1.0, font_color)
     }
 }
 
@@ -236,20 +246,27 @@ impl eframe::App for Overlay {
                         .keyboard
                         .get_effective_key_layer(key.row as usize, key.col as usize);
 
-                    let bytes = self.keyboard.matrix[effective_layer as usize][key.row as usize]
-                        [key.col as usize];
+                    let bytes = self.keyboard.get_keycode(
+                        effective_layer as usize,
+                        key.row as usize,
+                        key.col as usize,
+                    );
                     let keycode_label = keycode_labels::get_keycode_label(bytes);
 
                     let first_layer_bytes =
-                        self.keyboard.matrix[0][key.row as usize][key.col as usize];
+                        self.keyboard
+                            .get_keycode(0, key.row as usize, key.col as usize);
                     let first_layer_keycode_kind =
                         keycode_labels::get_keycode_label(first_layer_bytes).kind;
 
-                    let (fill_color, stroke_color, font_color) = self.get_keycode_color(
-                        keycode_label.layer_ref.unwrap_or(effective_layer),
-                        first_layer_keycode_kind,
-                        is_background_key,
-                    );
+                    let (fill_color, stroke_color, border_thickness, font_color) = self
+                        .get_keycode_color(
+                            keycode_label.layer_ref.unwrap_or(effective_layer),
+                            first_layer_keycode_kind,
+                            is_background_key,
+                            self.keyboard
+                                .is_key_pressed(key.row as usize, key.col as usize),
+                        );
 
                     // Draw key background
                     let rect = egui::Rect::from_min_size(
@@ -261,7 +278,7 @@ impl eframe::App for Overlay {
                         rect,
                         0.1 * self.size,
                         fill_color,
-                        egui::Stroke::new(1.0, stroke_color),
+                        egui::Stroke::new(border_thickness, stroke_color),
                         egui::StrokeKind::Outside,
                     );
 

@@ -1,5 +1,6 @@
 #![cfg_attr(target_os = "windows", windows_subsystem = "windows")]
 
+mod key_matrix;
 mod keyboard;
 mod keyboard_info;
 mod keycode_labels;

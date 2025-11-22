@@ -4,12 +4,13 @@ use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::{Duration, Instant};
 
+use crate::key_matrix::KeyMatrix;
 use crate::keyboard_info::{KeyboardInfo, KeyboardLayout};
 
 pub struct Keyboard {
     pub layout: KeyboardLayout,
-    pub matrix: Vec<Vec<Vec<u16>>>,
     pub time_to_hide_overlay: Arc<Mutex<Option<Instant>>>,
+    matrix: Arc<Mutex<KeyMatrix>>,
     layer_state: Arc<Mutex<u32>>,
     default_layer_state: Arc<Mutex<u32>>,
 }
@@ -24,17 +25,21 @@ impl Keyboard {
             .expect("Failed to connect to keyboard.");
 
         let layers = api.get_layer_count().expect("Failed to get layer count") as usize;
-
-        let matrix =
+        let keycodes =
             Self::get_keycodes_from_device(&api, layers, keyboard_info.rows, keyboard_info.cols);
 
         let layer_state = Arc::new(Mutex::new(0));
         let default_layer_state = Arc::new(Mutex::new(0));
         let time_to_hide_overlay = Arc::new(Mutex::new(Some(Instant::now())));
+        let matrix = Arc::new(Mutex::new(KeyMatrix::new(
+            keycodes,
+            keyboard_info.rows,
+            keyboard_info.cols,
+        )));
 
         let keyboard = Keyboard {
             layout,
-            matrix,
+            matrix: Arc::clone(&matrix),
             time_to_hide_overlay: Arc::clone(&time_to_hide_overlay),
             layer_state: Arc::clone(&layer_state),
             default_layer_state: Arc::clone(&default_layer_state),
@@ -43,6 +48,7 @@ impl Keyboard {
         let layer_state_clone = Arc::clone(&keyboard.layer_state);
         let default_layer_state_clone = Arc::clone(&keyboard.default_layer_state);
         let time_to_hide_clone = Arc::clone(&keyboard.time_to_hide_overlay);
+        let matrix_clone = Arc::clone(&matrix);
 
         thread::spawn(move || loop {
             if let Ok(response) = api.hid_read() {
@@ -66,6 +72,13 @@ impl Keyboard {
 
                     *layer_state_clone.lock().unwrap() = layer_state;
                     *default_layer_state_clone.lock().unwrap() = default_layer_state;
+                } else if response[0] == 0xF1 {
+                    let row = response[1] as usize;
+                    let col = response[2] as usize;
+                    let pressed = response[3];
+                    if let Ok(mut mat) = matrix_clone.lock() {
+                        mat.set_pressed(row, col, pressed != 0);
+                    }
                 }
             }
         });
@@ -101,7 +114,8 @@ impl Keyboard {
     pub fn get_effective_key_layer(&self, row: usize, col: usize) -> (u8, bool) {
         let layer_state = *self.layer_state.lock().unwrap();
         let default_layer_state = *self.default_layer_state.lock().unwrap();
-        let num_layers = self.matrix.len().min(32);
+        let matrix = self.matrix.lock().unwrap();
+        let num_layers = matrix.get_num_layers().min(32);
 
         // Track if there is any active momentary layer above the effective layer
         // (i.e, key should be shown as background key)
@@ -112,7 +126,7 @@ impl Keyboard {
             let is_active_default_layer = (default_layer_state & layer_mask) != 0;
             let is_active_momentary_layer = (layer_state & layer_mask) != 0;
             if is_active_momentary_layer || is_active_default_layer {
-                if self.matrix[i][row][col] != Keycode::KC_TRANSPARENT as u16 {
+                if matrix.get_keycode(i, row, col) != Keycode::KC_TRANSPARENT as u16 {
                     return (i as u8, is_active_default_layer && active_layer_above);
                 }
             }
@@ -120,6 +134,14 @@ impl Keyboard {
         }
 
         (0, active_layer_above)
+    }
+
+    pub fn get_keycode(&self, layer: usize, row: usize, col: usize) -> u16 {
+        self.matrix.lock().unwrap().get_keycode(layer, row, col)
+    }
+
+    pub fn is_key_pressed(&self, row: usize, col: usize) -> bool {
+        self.matrix.lock().unwrap().is_pressed(row, col)
     }
 
     pub fn try_get_api(vid: u16, pid: u16) -> Result<api::KeyboardApi, String> {
