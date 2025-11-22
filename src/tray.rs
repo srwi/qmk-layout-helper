@@ -4,7 +4,7 @@ use std::thread;
 use tray_icon::{menu::Menu, menu::MenuEvent, menu::MenuItem, Icon, TrayIcon, TrayIconBuilder};
 
 fn create_icon() -> Icon {
-    const ICON_BYTES: &[u8] = include_bytes!("..\\resources\\icon.ico");
+    const ICON_BYTES: &[u8] = include_bytes!("../resources/icon.ico");
 
     let icon = load_from_memory(ICON_BYTES)
         .expect("Failed to load icon.")
