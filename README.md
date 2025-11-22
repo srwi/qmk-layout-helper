@@ -1,10 +1,14 @@
-# QMK Layout Helper
+# QMK Layout Helper <img src="resources/icon.svg" align="right" width="15%"/>
 
-QMK Layout Helper is a tool to display the layout of a QMK keyboard on your screen as an overlay. It can be useful when learning a new keyboard layout with many layers whose key functions are not printed on the keycaps. It is designed to update automatically whenever the currently active layer changes. The keymap is read from the QMK firmware using the VIA protocol.
+QMK Layout Helper provides a live on‑screen overlay of your keyboard, mirroring the active base and momentary layers. It is especially helpful when learning complex multi‑layer layouts or using boards with missing legends. The overlay updates instantly on layer changes, using VIA to query the current keymap and layer state so the view always matches the firmware.
+
+It reflects the actual active layer stack, i.e. base and momentary layers, so the shown keys always correspond to the current effective layout.
+
+<img src=".github/assets/demo.gif" alt="QMK Layout Helper in action">
 
 ## Setup
 
-Unfortunately stock QMK firmware does not report layer changes to the operating system. Therefore, a small modification to the firmware is necessary, that sends layer change notifications over the RAW HID interface.
+Stock QMK does not expose layer change events to the host, so a minimal firmware change is required to send layer state updates via RAW HID.
 
 - Add the following to your `rules.mk` file to enable VIA and RAW HID support:
   ```
@@ -19,12 +23,24 @@ Unfortunately stock QMK firmware does not report layer changes to the operating 
   // Notify VIA about layer changes
   layer_state_t layer_state_set_user(layer_state_t state) {
       uint8_t data[RAW_EPSIZE] = {0};
-      data[0] = 0xff;
+      data[0] = 0xFF;
       data[1] = sizeof(layer_state_t);
       memcpy(&data[2], &default_layer_state, sizeof(layer_state_t));
       memcpy(&data[2 + sizeof(layer_state_t)], &state, sizeof(layer_state_t));
       raw_hid_send(data, RAW_EPSIZE);
       return state;
+  }
+  ```
+- Optionally, if you want the currently pressed keys to be highlighted, include the following:
+  ```c
+  bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+      static uint8_t data[RAW_EPSIZE];
+      data[0] = 0xF1;
+      data[1] = record->event.key.row;
+      data[2] = record->event.key.col;
+      data[3] = record->event.pressed ? 1 : 0;
+      raw_hid_send(data, RAW_EPSIZE);
+      return true;
   }
   ```
 - Compile and flash the modified firmware to your keyboard
@@ -39,29 +55,12 @@ Unfortunately stock QMK firmware does not report layer changes to the operating 
 
 ## Usage
 
-The only input required for QMK Layout Helper is the keyboard information json file obtained in the previous step. Make sure to pass the correct layout for your keyboard if it differs from the default `LAYOUT`.
+The only input required for QMK Layout Helper is the keyboard information json file obtained in the previous step. Make sure to select the correct layout for your keyboard.
 
-```sh
-$ ./qmk-layout-helper --help
-QMK layout viewer
+<img src=".github/assets/settings_window.png" alt="Settings window screenshot" width="60%">
 
-Usage: qmk-layout-helper [OPTIONS] <KEYBOARD_CONFIG>
+When "Remember settings" is checked, the selected options will be saved to a settings.ini file. For now, if you want to change the settings, either edit the settings.ini file manually or delete it to trigger the settings window on the next launch.
 
-Arguments:
-  <KEYBOARD_CONFIG>  Path to the keyboard information JSON file
+# License & Attribution
 
-Options:
-  -l, --layout <LAYOUT_NAME>  Name of the keyboard layout to display [default: LAYOUT]
-      --size <SIZE>           Size of the overlay window in the format 'width,height' [default: 700,240]
-      --position <POSITION>   Position of the overlay window [default: bottom-right] [possible values: top-left, top-right, bottom-left, bottom-right, bottom, top]
-      --timeout <TIMEOUT>     Timeout for the overlay in milliseconds [default: 5000]
-      --margin <MARGIN>       Margin around the overlay window [default: 10]
-  -h, --help                  Print help
-  -V, --version               Print version
-```
-
-Example usage:
-
-```sh
-./qmk-layout-helper keyboard_info.json --layout LAYOUT_60_ansi --position top-right
-```
+Parts of this project are based on code from [the VIA project](https://github.com/the-via/app), which is licensed under the GNU General Public License v3.0.
