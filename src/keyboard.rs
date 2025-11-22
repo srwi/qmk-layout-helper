@@ -16,15 +16,20 @@ pub struct Keyboard {
 }
 
 impl Keyboard {
-    pub fn new(keyboard_info: KeyboardInfo, layout_name: String, timeout: u64) -> Self {
+    pub fn new(
+        keyboard_info: KeyboardInfo,
+        layout_name: String,
+        timeout: u64,
+    ) -> Result<Self, String> {
         let layout = keyboard_info
             .get_layout(&layout_name)
-            .expect("Failed to get layout");
+            .map_err(|_| "Failed to get layout".to_string())?;
 
-        let api = Self::try_get_api(keyboard_info.vid, keyboard_info.pid)
-            .expect("Failed to connect to keyboard.");
+        let api = Self::try_get_api(keyboard_info.vid, keyboard_info.pid)?;
 
-        let layers = api.get_layer_count().expect("Failed to get layer count") as usize;
+        let layers = api
+            .get_layer_count()
+            .map_err(|_| "Failed to get layer count".to_string())? as usize;
         let keycodes =
             Self::get_keycodes_from_device(&api, layers, keyboard_info.rows, keyboard_info.cols);
 
@@ -83,7 +88,7 @@ impl Keyboard {
             }
         });
 
-        keyboard
+        Ok(keyboard)
     }
 
     fn get_keycodes_from_device(

@@ -378,8 +378,8 @@ pub fn get_basic_keycode_label(keycode_bytes: u16) -> Option<KeycodeLabel> {
             ..Default::default()
         }),
         Keycode::KC_KP_ENTER => Some(KeycodeLabel {
-            long: Some("Num\nEnter".to_string()),
-            short: Some("N.Ent".to_string()),
+            long: Some("Enter".to_string()),
+            symbol: Some(egui_phosphor::regular::ARROW_ELBOW_DOWN_LEFT.to_string()),
             ..Default::default()
         }),
         Keycode::KC_KP_1 => Some(KeycodeLabel {
