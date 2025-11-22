@@ -20,7 +20,7 @@ Stock QMK does not expose layer change events to the host, so a minimal firmware
   #include "raw_hid.h"
   #include "usb_descriptor.h"
   
-  // Notify VIA about layer changes
+  // Notify about layer changes
   layer_state_t layer_state_set_user(layer_state_t state) {
       uint8_t data[RAW_EPSIZE] = {0};
       data[0] = 0xFF;
@@ -33,6 +33,7 @@ Stock QMK does not expose layer change events to the host, so a minimal firmware
   ```
 - Optionally, if you want the currently pressed keys to be highlighted, include the following:
   ```c
+  // Notify about key press/release events
   bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       static uint8_t data[RAW_EPSIZE];
       data[0] = 0xF1;

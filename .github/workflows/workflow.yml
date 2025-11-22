@@ -3,7 +3,6 @@ name: Build and release
 on:
   push:
     branches:
-      - main
       - master
     tags:
       - '*'
@@ -32,11 +31,18 @@ jobs:
       - name: Build
         run: cargo build --release
 
+      - name: Get version
+        id: get_version
+        run: echo "VERSION=$(cargo metadata --no-deps --format-version 1 | jq -r '.packages[0].version')" >> $GITHUB_OUTPUT
+
+      - name: Rename binary
+        run: mv target/release/qmk-layout-helper target/release/qmk-layout-helper-v${{ steps.get_version.outputs.VERSION }}-linux
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: linux-binary
-          path: target/release/qmk-layout-helper
+          path: target/release/qmk-layout-helper-v${{ steps.get_version.outputs.VERSION }}-linux
 
   build-windows:
     runs-on: windows-latest
@@ -54,11 +60,20 @@ jobs:
       - name: Build
         run: cargo build --release
 
+      - name: Get version
+        id: get_version
+        run: |
+          $version = (cargo metadata --no-deps --format-version 1 | ConvertFrom-Json).packages[0].version
+          echo "VERSION=$version" >> $env:GITHUB_OUTPUT
+
+      - name: Rename binary
+        run: move target/release/qmk-layout-helper.exe target/release/qmk-layout-helper-v${{ steps.get_version.outputs.VERSION }}-windows.exe
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: windows-binary
-          path: target/release/qmk-layout-helper.exe
+          path: target/release/qmk-layout-helper-v${{ steps.get_version.outputs.VERSION }}-windows.exe
 
   build-macos:
     runs-on: macos-latest
@@ -76,11 +91,18 @@ jobs:
       - name: Build
         run: cargo build --release
 
+      - name: Get version
+        id: get_version
+        run: echo "VERSION=$(cargo metadata --no-deps --format-version 1 | jq -r '.packages[0].version')" >> $GITHUB_OUTPUT
+
+      - name: Rename binary
+        run: mv target/release/qmk-layout-helper target/release/qmk-layout-helper-v${{ steps.get_version.outputs.VERSION }}-macos
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: macos-binary
-          path: target/release/qmk-layout-helper
+          path: target/release/qmk-layout-helper-v${{ steps.get_version.outputs.VERSION }}-macos
 
   create-release:
     runs-on: ubuntu-latest
@@ -113,8 +135,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release create "${{ github.ref_name }}" \
-            "./artifacts/qmk-layout-helper.exe" \
-            "./artifacts/qmk-layout-helper" \
+            ./artifacts/* \
             --draft \
-            --title "${{ github.ref_name }}" \
-            "./artifacts/qmk-layout-helper"
+            --title "${{ github.ref_name }}"
