@@ -150,8 +150,11 @@ impl Keyboard {
     }
 
     pub fn try_get_api(vid: u16, pid: u16) -> Result<api::KeyboardApi, String> {
-        let api = api::KeyboardApi::new(vid, pid, 0xff60)
-            .map_err(|e| format!("Failed to connect to device ({vid:04x}:{pid:04x}): {e}"))?;
+        // Use worker-based initialization on macOS to avoid IOHIDDeviceSetReport hangs.
+        #[allow(unused_imports)]
+        use crate::hid_worker::init_keyboard_api;
+
+        let api = init_keyboard_api(vid, pid)?;
 
         let protocol_version = api
             .get_protocol_version()

@@ -1,4 +1,5 @@
 #![cfg_attr(target_os = "windows", windows_subsystem = "windows")]
+mod hid_worker;
 mod key_matrix;
 mod keyboard;
 mod keyboard_info;
@@ -6,7 +7,7 @@ mod keycode_labels;
 mod overlay_window;
 mod settings;
 mod settings_window;
-mod tray;
+mod tray; // macOS HID initialization worker
 
 use eframe::egui::{self, IconData};
 use keyboard::Keyboard;
